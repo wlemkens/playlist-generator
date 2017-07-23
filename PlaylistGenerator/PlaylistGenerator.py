@@ -7,12 +7,14 @@
 import os
 from mutagen.id3._util import ID3NoHeaderError
 from mutagen.mp3 import MP3
+from mutagen.flac import FLAC
 from mutagen.easyid3 import EasyID3
 import taglib
+from PlaylistGenerator.Track import Track
 
 # custom imports
 
-class PlaylistGenerator:
+class PlaylistGenerator(object):
 	def __init__(self,musicPath,playlistMetrics):
 		self.extensions = ["mp3","flac"]
 		self.musicPath = musicPath.rstrip('/')
@@ -24,36 +26,30 @@ class PlaylistGenerator:
 		fileList = self.getFilesFromDirectory(self.musicPath)
 		for f in fileList:
 			danceType = self.getType(f)
-			if danceType:
+			length = self.getAudioLength(f)
+			if danceType and length>0:
+				track = Track(f,length)
 				if danceType in self.lookupTable:
-					self.lookupTable[danceType]+=[f]
+					self.lookupTable[danceType]+=[track]
 				else:
-					self.lookupTable[danceType]=[f]
+					self.lookupTable[danceType]=[track]
 		#print (self.lookupTable)
 		
-	def getMP3Type(self, filename):
-		try:
-			id3info = EasyID3(filename)
-			#print (id3info)
-			genre = id3info["genre"]
-			if len(genre)>0:
-				return genre[0]
-		except (FileNotFoundError):
-			print("Error loading file '"+filename+"'")
-		except (KeyError):
-			print("Not found any genre tag for '"+filename+"'")
-		except (ID3NoHeaderError):
-			print("No ID3 tag present for file '"+filename+"'")
-		return None
+	def getAudioLength(self,filename):
+		if filename.split(".")[-1]=="mp3":
+			audio = MP3(filename)
+			return audio.info.length
+		else:
+			audio = FLAC(filename)
+			return audio.info.length
+		return 0
 		
-	def getFlacType(self,filename):
+	def getType(self,filename):
 		try:
 			id3info = taglib.File(filename)
-			#print ("-->'"+str(id3info.tags)+"'")
 			genre = id3info.tags["GENRE"]
 			if len(genre)>0:
-				#print("Found genre for file '"+filename+"'")
-				return genre[0]
+				return genre[0].lstrip('Folk ')
 			else:
 				print("Not found genre for file '"+filename+"'")
 		except (OSError):
@@ -62,15 +58,8 @@ class PlaylistGenerator:
 			print("Not found any genre tag for '"+filename+"'")
 		return None
 		
-	def getType(self, filename):
-		#if filename.split(".")[-1]=="mp3":
-			#return self.getMP3Type(filename)
-		#else:
-			return self.getFlacType(filename)
-		
 		
 	def getFilesFromDirectory(self, directory):
-		#print ("In dir "+directory)
 		fileList = []
 		for filename in os.listdir(directory):
 			if os.path.isfile(directory+"/"+filename):
@@ -81,25 +70,4 @@ class PlaylistGenerator:
 			else:
 				fileList += self.getFilesFromDirectory(directory+"/"+filename)
 		return fileList
-	
-	#def getFilesFromDirectory(self, directory):
-		#print ("In dir "+directory)
-		#fileList = []
-		#for root,dirs,files in os.walk(directory):
-			#for d in dirs:
-				#print ("Processing dir "+d)
-				#if (directory==""):
-					#newdir = d
-				#else:
-					#newdir = directory+"/"+d
-				#subFiles = self.getFilesFromDirectory(newdir)
-				#fileList += subFiles
-			#print ("Done dirs")
-			#for f in files:
-				#filenameParts = f.split(".")
-				#if (filenameParts[-1] in self.extensions):
-					#print ("Processing "+directory+"/"+f)
-					#fileList += [directory+"/"+f]
-		#return fileList
-		
 	
