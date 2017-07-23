@@ -17,10 +17,11 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 		lastGenre = None
 		while (totalDuration<self.duration):
 			song = self.generateSong()
-			if (lastGenre!=song.genre):
-				lastGenre = song.genre
-				self.playlist += [song]
-				totalDuration += song.length
+			if (song and lastGenre!=song.genre):
+				if (not song in self.playlist):
+					lastGenre = song.genre
+					self.playlist += [song]
+					totalDuration += song.length
 		self.savePlaylist()
 
 	def savePlaylist(self):
