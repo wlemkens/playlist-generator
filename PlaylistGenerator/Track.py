@@ -2,10 +2,12 @@
 
 
 class Track(object):
-	def __init__(self,url,genre,length):
+	def __init__(self,url,genre,length,fileType,title):
 		self.url = url
 		self.genre = genre
 		self.length = length
+		self.fileType = fileType
+		self.title = title
 		
 	def __str__(self):
 		return "[url: "+self.url+", genre: "+self.genre+", length: "+str(self.length)+" s]"

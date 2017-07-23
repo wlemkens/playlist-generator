@@ -9,6 +9,7 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 		self.outputFile = outputFile
 		self.duration = float(duration*60)
 		self.playlist = []
+		self.extinf = {'mp3':"#EXTINF:221",'flac':"#EXTINF:331"}
 
 	def generatePlaylist(self):
 		print ("Generating playlist of "+str(self.duration/60)+" minutes")
@@ -20,4 +21,15 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 				lastGenre = song.genre
 				self.playlist += [song]
 				totalDuration += song.length
-		print (self.playlist)
+		self.savePlaylist()
+
+	def savePlaylist(self):
+		header = "#EXTM3U\n"
+		with open(self.outputFile,'w') as f:
+			f.write(header)
+			for song in self.playlist:
+				extinf = self.extinf[song.fileType]
+				extline = extinf+","+song.title+"\n"
+				fileline = song.url+"\n"
+				f.write(extline)
+				f.write(fileline)
