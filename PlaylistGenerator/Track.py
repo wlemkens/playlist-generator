@@ -2,12 +2,13 @@
 
 
 class Track(object):
-	def __init__(self,url,length):
+	def __init__(self,url,genre,length):
 		self.url = url
+		self.genre = genre
 		self.length = length
 		
 	def __str__(self):
-		return "[url: "+self.url+", length: "+str(self.length)+" s]"
+		return "[url: "+self.url+", genre: "+self.genre+", length: "+str(self.length)+" s]"
 	
 	def __unicode__(self):
 		return u(self.__str__())

@@ -11,16 +11,19 @@ from mutagen.flac import FLAC
 from mutagen.easyid3 import EasyID3
 import taglib
 from PlaylistGenerator.Track import Track
+from PlaylistGenerator.PlaylistMetrics import PlaylistMetrics
+import random
 
 # custom imports
 
 class PlaylistGenerator(object):
-	def __init__(self,musicPath,playlistMetrics):
+	def __init__(self,musicPath,playlistMetricsFile):
 		self.extensions = ["mp3","flac"]
 		self.musicPath = musicPath.rstrip('/')
-		self.playlistMetrics = playlistMetrics
+		self.playlistMetrics = PlaylistMetrics()
 		self.lookupTable = {}
 		self.generateLookupTable()
+		self.playlistMetrics.load(playlistMetricsFile)
 		
 	def generateLookupTable(self):
 		fileList = self.getFilesFromDirectory(self.musicPath)
@@ -28,7 +31,7 @@ class PlaylistGenerator(object):
 			danceType = self.getType(f)
 			length = self.getAudioLength(f)
 			if danceType and length>0:
-				track = Track(f,length)
+				track = Track(f,danceType,length)
 				if danceType in self.lookupTable:
 					self.lookupTable[danceType]+=[track]
 				else:
@@ -49,7 +52,10 @@ class PlaylistGenerator(object):
 			id3info = taglib.File(filename)
 			genre = id3info.tags["GENRE"]
 			if len(genre)>0:
-				return genre[0].lstrip('Folk ')
+				genreName = genre[0].lower()
+				if genreName[:5] == "folk ":
+					genreName = genreName[5:]
+				return genreName
 			else:
 				print("Not found genre for file '"+filename+"'")
 		except (OSError):
@@ -71,3 +77,15 @@ class PlaylistGenerator(object):
 				fileList += self.getFilesFromDirectory(directory+"/"+filename)
 		return fileList
 	
+	def generateSong(self):
+		value = random.random()
+		for item in self.playlistMetrics.cumulativeList:
+			if item[0]>value:
+				genre = item[1]
+				if genre in self.lookupTable:
+					nbOfSongs = len(self.lookupTable[genre])
+					index = random.randint(0,nbOfSongs-1)
+					return self.lookupTable[genre][index]
+				else:
+					print ("WARNING: dance '"+genre+"' not found in set")
+					return self.generateSong()

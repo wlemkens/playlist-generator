@@ -1,0 +1,20 @@
+# Taking 300s as average track length including announcements there fit exactly 18 tracks in a playlist of 1.5 hours. An easy rule of thumb to create a playlist is say how many times you want a specific dance in the playlist in a span of 1.5 hours. It can be floating points to not include somehting in a playlist every set (it is random, so 1 doesn't mean exactly 1 time.
+
+scottish = 4
+wals = 2
+mazurka = 3
+wals in 5 = 0.5
+wals in 8 = 0.5
+wals in 11 = 0.1
+tovercirkel = 2
+jigs = 1
+tarantella = 0.1
+kost ar koat = 1
+miserlou = 0.1
+fandango = 0.5
+bourrée in 2 = 2
+bourrée in 3 = 1
+repasseado = 0.1
+andro = 1
+hanterdro = 1
+gavottes suite = 0
