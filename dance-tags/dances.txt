@@ -1,0 +1,58 @@
+scottish = scottish
+wals = wals
+mazurka = mazurka
+wals in 5 = wals in 5
+wals in 8 = wals in 8
+wals in 11 = wals in 11
+tovercirkel = tovercirkel
+jigs = jigs = french
+tarantella = tarantella
+kost ar koat = kost ar oat
+miserlou = miserloe
+fandango = fandango
+fandango - arin arin = fandango
+bourrée in 2 = boerree in 2
+bourrée in 3 = boerree in 3
+repasseado = repasseado
+andro = andro
+hanterdro = hanterdro
+gavottes suite = gavvotte swiet
+gavotte = gavvotte
+polka = polka
+gavotte de l'aven = gavotte de l'aven = french
+marachines = marachien
+marchoise = marchwaaz
+madison = madison
+pas d'été = pa d'été
+plinn = plinn
+plinn suite = plinn swiet
+polska = polska
+polka = polka
+reels = riels
+ridée = ridée
+laridée = laridée = french
+rond de st vincent = rond de saint vincent = french
+rondeau = rondeau
+rondeau en chaine = rondeau en chène
+rondeau en couple = rondeau en coeple
+scottish impaire = scottish impair
+suite de bransles = swiete de branle
+tricot = triko
+la poraie = la poraie = french
+poraie = poraie = french
+bal limousine = bal limousien
+avant deux = avant deu
+kas abarh = kasabba
+carnaval de lantz = carnaval de lantz
+chula picada = chula picada
+drumul dracului = drumul draculi
+erva cidreira = erva cidreira
+fado batido = fado batido
+mardi gras = mardi gra
+mazurka - wals = mazurka - wals
+ronde de loudéac = ronde de loedéac
+rondes du quercy = ronde du kercy
+scottish - polka = scottish - polka
+tovercirkel - wals - tovercirkel = tovercirkel - wals - tovercirkel
+wals - scottish = wals - scottish
+wals écossaise = wals écossèse
