@@ -16,12 +16,9 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 		totalDuration = 0.0
 		lastGenre = None
 		while (totalDuration<self.duration):
-			song = self.generateSong()
-			if (song and lastGenre!=song.genre):
-				if (not song in self.playlist):
-					lastGenre = song.genre
-					self.playlist += [song]
-					totalDuration += song.length
+			song = self.generateUniqueSong()
+			self.playlist += [song]
+			totalDuration += song.length
 		self.savePlaylist()
 
 	def savePlaylist(self):

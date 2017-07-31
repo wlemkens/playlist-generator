@@ -2,6 +2,7 @@
 
 # Dependencies
 # python3-taglib : sudo apt install python3-taglib
+# sudo apt install python3-mutagen
 
 # system imports
 import os
@@ -12,21 +13,24 @@ from mutagen.easyid3 import EasyID3
 import taglib
 from PlaylistGenerator.Track import Track
 from PlaylistGenerator.PlaylistMetrics import PlaylistMetrics
+from Tools import DirectoryTools
 import random
 
 # custom imports
 
 class PlaylistGenerator(object):
 	def __init__(self,musicPath,playlistMetricsFile):
-		self.extensions = ["mp3","flac"]
 		self.musicPath = musicPath.rstrip('/')
 		self.playlistMetrics = PlaylistMetrics()
 		self.lookupTable = {}
 		self.generateLookupTable()
+		self.fullLookupTable = self.lookupTable.copy()
 		self.playlistMetrics.load(playlistMetricsFile)
+		self.lastGenre = None
+		self.songList = []
 		
 	def generateLookupTable(self):
-		fileList = self.getFilesFromDirectory(self.musicPath)
+		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
 		for f in fileList:
 			danceType = self.getType(f)
 			length = self.getAudioLength(f)
@@ -86,18 +90,7 @@ class PlaylistGenerator(object):
 			print("Not found any title tag for '"+filename+"'")
 		return None
 		
-	def getFilesFromDirectory(self, directory):
-		fileList = []
-		for filename in os.listdir(directory):
-			if os.path.isfile(directory+"/"+filename):
-				filenameParts = filename.split(".")
-				if (filenameParts[-1] in self.extensions):
-					#print ("Processing "+directory+"/"+filename)
-					fileList += [directory+"/"+filename]
-			else:
-				fileList += self.getFilesFromDirectory(directory+"/"+filename)
-		return fileList
-	
+
 	def generateSong(self):
 		value = random.random()
 		for item in self.playlistMetrics.cumulativeList:
@@ -106,7 +99,17 @@ class PlaylistGenerator(object):
 				if genre in self.lookupTable:
 					nbOfSongs = len(self.lookupTable[genre])
 					index = random.randint(0,nbOfSongs-1)
-					return self.lookupTable[genre][index]
+					song = self.lookupTable[genre][index]
+					self.lookupTable[genre] = self.lookupTable[genre][:index]+self.lookupTable[genre][index+1:]
+					return song
 				else:
 					print ("WARNING: dance '"+genre+"' not found in set")
 					return self.generateSong()
+	
+	def generateUniqueSong(self):
+		song = self.generateSong()
+		while (not song or self.lastGenre==song.genre or song in self.songList):
+			song = self.generateSong()
+		self.lastGenre = song.genre
+		self.songList += [song]
+		return song
