@@ -8,7 +8,7 @@ tovercirkel = tovercirkel
 jigs = jigs = french
 tarantella = tarantella
 kost ar koat = kost ar oat
-miserlou = miserloe
+misirlou = misirloe
 fandango = fandango
 fandango - arin arin = fandango
 bourrée in 2 = boerree in 2
@@ -30,7 +30,7 @@ polska = polska
 polka = polka
 reels = riels
 ridée = ridée
-laridée = laridée = french
+laridé = laridé = french
 ronde de st vincent = rond de saint vincent = french
 rondeau = rondeau
 rondeau en chaine = rondeau en chène
@@ -56,3 +56,4 @@ scottish - polka = scottish - polka
 tovercirkel - wals - tovercirkel = tovercirkel - wals - tovercirkel
 wals - scottish = wals - scottish
 wals écossaise = wals écossèse
+suite de loudéac = swiete de loedéac
