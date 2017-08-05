@@ -33,9 +33,12 @@ def getGenre(filename):
 			return genreName
 		else:
 			print("Not found genre for file '"+filename+"'")
+			return None
 	except (OSError):
 		print("Error loading file '"+filename+"'")
+		return None
 	except (KeyError):
 		print("Not found any genre tag for '"+filename+"'")
+		return None
 	return None
 	
