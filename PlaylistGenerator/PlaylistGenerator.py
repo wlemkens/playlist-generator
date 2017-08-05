@@ -34,7 +34,7 @@ class PlaylistGenerator(object):
 		for f in fileList:
 			danceType = self.getType(f)
 			length = self.getAudioLength(f)
-			fileType = self.getFileType(f)
+			fileType = DirectoryTools.getFileType(f)
 			title = self.getTitle(f)
 			if danceType and length>0:
 				track = Track(f,danceType,length,fileType,title)
@@ -43,9 +43,6 @@ class PlaylistGenerator(object):
 				else:
 					self.lookupTable[danceType]=[track]
 		#print (self.lookupTable)
-
-	def getFileType(self,filename):
-		return filename.split(".")[-1]
 
 	def getAudioLength(self,filename):
 		if filename.split(".")[-1]=="mp3":

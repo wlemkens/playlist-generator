@@ -16,3 +16,7 @@ def getFilesFromDirectory(directory):
 		else:
 			fileList += getFilesFromDirectory(directory+"/"+filename)
 	return fileList
+
+def getFileType(filename):
+	return filename.split(".")[-1]
+
