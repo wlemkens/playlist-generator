@@ -2,6 +2,7 @@
 
 import os
 import sys
+import taglib
 
 # sudo pip3 install pydub
 from pydub import AudioSegment
@@ -29,7 +30,7 @@ class DanceAudioTagger(object):
 			
 	def createTaggedSong(self,songfile,genreDict):
 		try:
-			filename = songfile[len(self.musicPath):]
+			filename = os.path.splitext(songfile[len(self.musicPath):])[0]
 			song = AudioSegment.from_file(songfile, DirectoryTools.getFileType(songfile))
 			genreType = DirectoryTools.getGenre(songfile)
 			if genreType and genreType in genreDict:
@@ -37,12 +38,21 @@ class DanceAudioTagger(object):
 				genre = AudioSegment.from_mp3(genrefile)
 				pause = AudioSegment.silent(duration=10000)
 				taggedSong = genre+pause+genre+song
-				outfile = self.outputPath+filename
+				outfile = self.outputPath+filename+".mp3"
 				outPath = os.path.dirname(outfile)
 				if not os.path.exists(outPath):
 					os.makedirs(outPath)
 				taggedSong.export(outfile,format="mp3")
+				self.copyTags(songfile,outfile)
 			else:
 				print ("No tag for dance '"+genreType+"' found for file '"+songfile+"'")
 		except:
 			print ("Failed to prepend "+self.outputPath+filename+" : "+str(sys.exc_info()[0]))
+
+	def copyTags(self,original, target):
+		#print ("Moving tags from "+original+" to "+target)
+		oldSong = taglib.File(original)
+		#print (oldSong.tags)
+		newSong = taglib.File(target)
+		newSong.tags = oldSong.tags
+		newSong.save()
