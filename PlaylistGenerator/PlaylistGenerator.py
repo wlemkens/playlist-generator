@@ -32,7 +32,7 @@ class PlaylistGenerator(object):
 	def generateLookupTable(self):
 		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
 		for f in fileList:
-			danceType = self.getType(f)
+			danceType = DirectoryTools.getGenre(f)
 			length = self.getAudioLength(f)
 			fileType = DirectoryTools.getFileType(f)
 			title = self.getTitle(f)
@@ -53,32 +53,13 @@ class PlaylistGenerator(object):
 			return audio.info.length
 		return 0
 		
-	def getType(self,filename):
-		try:
-			id3info = taglib.File(filename)
-			genre = id3info.tags["GENRE"]
-			if len(genre)>0:
-				genreName = genre[0].lower()
-				if genreName[:5] == "folk ":
-					genreName = genreName[5:]
-				return genreName
-			#else:
-				#print("Not found genre for file '"+filename+"'")
-		except (OSError):
-			print("Error loading file '"+filename+"'")
-		except (KeyError):
-			print("Not found any genre tag for '"+filename+"'")
-		return None
-		
 	def getTitle(self,filename):
 		try:
 			id3info = taglib.File(filename)
-			genre = id3info.tags["TITLE"]
-			if len(genre)>0:
-				genreName = genre[0].lower()
-				if genreName[:5] == "folk ":
-					genreName = genreName[5:]
-				return genreName
+			title = id3info.tags["TITLE"]
+			if len(title)>0:
+				titleName = title[0]
+				return titleName
 			else:
 				print("Not found title for file '"+filename+"'")
 		except (OSError):

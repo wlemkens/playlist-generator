@@ -21,3 +21,20 @@ def getFilesFromDirectory(directory):
 def getFileType(filename):
 	return filename.split(".")[-1]
 
+def getGenre(filename):
+	try:
+		id3info = taglib.File(filename)
+		genre = id3info.tags["GENRE"]
+		if len(genre)>0:
+			genreName = genre[0].lower()
+			if genreName[:5] == "folk ":
+				genreName = genreName[5:]
+			return genreName
+		else:
+			print("Not found genre for file '"+filename+"'")
+	except (OSError):
+		print("Error loading file '"+filename+"'")
+	except (KeyError):
+		print("Not found any genre tag for '"+filename+"'")
+	return None
+	
