@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# sudo pip install pydub
+# sudo pip3 install pydub
 from pydub import AudioSegment
 from Tools import DirectoryTools
 
