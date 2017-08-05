@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import os
+
 # custom imports
 from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 
@@ -28,8 +30,8 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 			for song in self.playlist:
 				extinf = self.extinf[song.fileType]
 				extline = extinf+","+song.title+"\n"
-				path = os.path.commonpath(song.url,self.outputFile)
-				print (path)
-				fileline = song.url+"\n"
+				path = os.path.commonpath([song.url,self.outputFile])
+				url = song.url[len(path)+1:]
+				fileline = url+"\n"
 				f.write(extline)
 				f.write(fileline)
