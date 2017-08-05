@@ -6,6 +6,7 @@ import os
 extensions = ["mp3","flac"]
 
 def getFilesFromDirectory(directory):
+	directory = directory.rstrip("/")
 	fileList = []
 	for filename in os.listdir(directory):
 		if os.path.isfile(directory+"/"+filename):
