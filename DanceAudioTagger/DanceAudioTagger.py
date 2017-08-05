@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import sys
 
 # sudo pip3 install pydub
 from pydub import AudioSegment
@@ -29,19 +30,19 @@ class DanceAudioTagger(object):
 	def createTaggedSong(self,songfile,genreDict):
 		try:
 			filename = songfile[len(self.musicPath):]
-			if DirectoryTools.getFileType(songfile)=="mp3":
-				song = AudioSegment.from_mp3(songfile)
-			else:
-				song = AudioSegment.from_flac(songfile)
+			song = AudioSegment.from_file(songfile, DirectoryTools.getFileType(songfile))
 			genreType = DirectoryTools.getGenre(songfile)
-			genrefile = genreDict[genreType]
-			genre = AudioSegment.from_mp3(genrefile)
-			pause = AudioSegment.silent(duration=10000)
-			taggedSong = genre+pause+genre+song
-			outfile = self.outputPath+filename
-			outPath = os.path.dirname(outfile)
-			if not os.path.exists(outPath):
-				os.makedirs(outPath)
-			taggedSong.export(outfile,format="mp3")
+			if genreType and genreType in genreDict:
+				genrefile = genreDict[genreType]
+				genre = AudioSegment.from_mp3(genrefile)
+				pause = AudioSegment.silent(duration=10000)
+				taggedSong = genre+pause+genre+song
+				outfile = self.outputPath+filename
+				outPath = os.path.dirname(outfile)
+				if not os.path.exists(outPath):
+					os.makedirs(outPath)
+				taggedSong.export(outfile,format="mp3")
+			else:
+				print ("No tag for dance '"+genreType+"' found for file '"+songfile+"'")
 		except:
-			print ("Failed to prepend "+self.outputPath+filename)
+			print ("Failed to prepend "+self.outputPath+filename+" : "+str(sys.exc_info()[0]))
