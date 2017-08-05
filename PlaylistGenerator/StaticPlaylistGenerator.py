@@ -28,6 +28,8 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 			for song in self.playlist:
 				extinf = self.extinf[song.fileType]
 				extline = extinf+","+song.title+"\n"
+				path = os.path.commonpath(song.url,self.outputFile)
+				print (path)
 				fileline = song.url+"\n"
 				f.write(extline)
 				f.write(fileline)
