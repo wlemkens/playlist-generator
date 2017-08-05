@@ -20,7 +20,7 @@ gavottes suite = gavvotte swiet
 gavotte = gavvotte
 polka = polka
 gavotte de l'aven = gavotte de l'aven = french
-marachines = marachien
+maraichines = marachien
 marchoise = marchwaaz
 madison = madison
 pas d'été = pa d'été
@@ -31,7 +31,7 @@ polka = polka
 reels = riels
 ridée = ridée
 laridée = laridée = french
-rond de st vincent = rond de saint vincent = french
+ronde de st vincent = rond de saint vincent = french
 rondeau = rondeau
 rondeau en chaine = rondeau en chène
 rondeau en couple = rondeau en coeple
