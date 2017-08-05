@@ -45,7 +45,9 @@ class DanceAudioTagger(object):
 				taggedSong.export(outfile,format="mp3")
 				self.copyTags(songfile,outfile)
 			else:
-				print ("No tag for dance '"+genreType+"' found for file '"+songfile+"'")
+				# Just to reduce the number of useless warnings
+				if not genreType in ["folk","world","balfolk","celtic","folklore"]:
+					print ("No tag for dance '"+genreType+"' found for file '"+songfile+"'")
 		except:
 			print ("Failed to prepend "+self.outputPath+filename+" : "+str(sys.exc_info()[0]))
 
