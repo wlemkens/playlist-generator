@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import taglib
 
 
 extensions = ["mp3","flac"]
