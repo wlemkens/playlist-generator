@@ -57,3 +57,4 @@ tovercirkel - wals - tovercirkel = tovercirkel - wals - tovercirkel
 wals - scottish = wals - scottish
 wals écossaise = wals écossèse
 suite de loudéac = swiete de loedéac
+rond d'argenton = rond d'argenton = french
