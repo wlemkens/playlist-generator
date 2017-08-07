@@ -68,41 +68,97 @@ class PlayerPanel(BoxLayout):
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
 		
+		self.newSong = False
+		self.songIndex = -1
+		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+		self._keyboard.bind(on_key_down=self._on_keyboard_down)
+		self.p = None
+		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
 		self.dancePanel = Label(text="Test")
 		self.add_widget(self.dancePanel)
 		self.titlePanel = Label(text="Test")
 		self.add_widget(self.titlePanel)
 		self.bandPanel = Label(text="Test")
 		self.add_widget(self.bandPanel)
+		self.paused = True
+		t = threading.Thread(target=self.generateSong)
+		t.start()
+		event = Clock.schedule_interval(self.startSong, 1 / 30.)
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
 
+	def _keyboard_closed(self):
+			self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+			self._keyboard = None
+
+	def pause(self):
+		if self.paused:
+			self.p.play()
+			self.paused = False
+		else:
+			self.p.pause()
+			self.paused = True
+	def backward(self):
+		pass
+	def forward(self):
+		pass
+	def playPrevious(self):
+		global song
+		if self.songIndex>0:
+			self.songIndex -= 1
+			song = self.playlistGenerator.songList[self.songIndex]
+			self.newSong = True
+	def playNext(self):
+		global song
+		if self.songIndex<len(self.playlistGenerator.songList)-1:
+			self.songIndex += 1
+			song = self.playlistGenerator.songList[self.songIndex]
+			self.newSong = True
+		else:
+			self.generateSong()
 	
-class PlaylistPlayer(App):
+	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+			if keycode[1] == 'spacebar':
+				self.pause()
+			elif keycode[1] == 'left':
+				if len(modifiers)>0 and modifiers[0] == 'shift':
+					self.backward()
+				else:
+					self.playPrevious()
+			elif keycode[1] == 'right':
+				if len(modifiers)>0 and modifiers[0] == 'shift':
+					self.forward()
+				else:
+					self.playNext()
+			return True
+
 	def generateSong(self):
 		global song
 		song = self.playlistGenerator.generateUniqueSong()
 		self.newSong = True
-		
-	def build(self):
-		self.newSong = False
-		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
-		panel = PlayerPanel(orientation='vertical')
-		#Window.fullscreen = 'auto'
-		t = threading.Thread(target=self.generateSong)
-		t.start()
-		event = Clock.schedule_interval(self.startSong, 1 / 30.)
-		return panel
-
+		self.songIndex += 1
+	
 	def songEndReachedCallback(self,ev):
 		self.generateSong()
 
 	def startSong(self,dt):
 		if self.newSong:
+			if self.p:
+				self.p.stop()
 			self.p = vlc.MediaPlayer(song.url)
 			pevent = self.p.event_manager()
 			pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
 			self.p.play()
 			self.newSong = False
+			self.paused = False
+
+class PlaylistPlayer(App):
+		
+	def build(self):
+		self.newSong = False
+		self.panel = PlayerPanel(orientation='vertical')
+		#Window.fullscreen = 'auto'
+		return self.panel
+
 
 		
 if __name__ == '__main__':
