@@ -21,6 +21,7 @@ from kivy.config import Config
 import numpy as np
 import sys
 import threading
+import vlc
 
 from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 
@@ -80,15 +81,29 @@ class PlaylistPlayer(App):
 	def generateSong(self):
 		global song
 		song = self.playlistGenerator.generateUniqueSong()
-		print ("Generated "+song.title)
+		self.newSong = True
 		
 	def build(self):
+		self.newSong = False
 		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
 		panel = PlayerPanel(orientation='vertical')
 		#Window.fullscreen = 'auto'
 		t = threading.Thread(target=self.generateSong)
 		t.start()
+		event = Clock.schedule_interval(self.startSong, 1 / 30.)
 		return panel
+
+	def songEndReachedCallback(self,ev):
+		self.generateSong()
+
+	def startSong(self,dt):
+		if self.newSong:
+			self.p = vlc.MediaPlayer(song.url)
+			pevent = self.p.event_manager()
+			pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
+			self.p.play()
+			self.newSong = False
+
 		
 if __name__ == '__main__':
 	PlaylistPlayer().run()
