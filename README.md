@@ -1,6 +1,23 @@
 # playlist-generator
 A tool to create ball folk playlist from tagged mp3/flac music
 
+# Install
+Install instructions for Ubuntu 16.04. 
+These instructions are not tested on any other platform.
+There should be no OS dependend prerequisites however, so if you managed to install it on an other platform, feel free to add the info.
+
+## Prerequisites
+Taglib, Mutagen, PyDub and Kivy
+
+```
+sudo apt install python3-taglib python3-mutagen
+sudo pip3 install pydub
+sudo add-apt-repository ppa:kivy-team/kivy
+sudo apt-get update
+sudo apt-get install python3-kivy
+```
+
+
 # Tools
 There are several tools to create playlists
 
