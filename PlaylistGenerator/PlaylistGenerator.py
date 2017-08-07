@@ -36,8 +36,9 @@ class PlaylistGenerator(object):
 			length = self.getAudioLength(f)
 			fileType = DirectoryTools.getFileType(f)
 			title = self.getTitle(f)
+			band = self.getBand(f)
 			if danceType and length>0:
-				track = Track(f,danceType,length,fileType,title)
+				track = Track(f,danceType,length,fileType,title,band)
 				if danceType in self.lookupTable:
 					self.lookupTable[danceType]+=[track]
 				else:
@@ -66,6 +67,21 @@ class PlaylistGenerator(object):
 			print("Error loading file '"+filename+"'")
 		except (KeyError):
 			print("Not found any title tag for '"+filename+"'")
+		return None
+		
+	def getBand(self,filename):
+		try:
+			id3info = taglib.File(filename)
+			band = id3info.tags["ARTIST"]
+			if len(band)>0:
+				bandName = band[0]
+				return bandName
+			else:
+				print("Not found band for file '"+filename+"'")
+		except (OSError):
+			print("Error loading file '"+filename+"'")
+		except (KeyError):
+			print("Not found any band tag for '"+filename+"'")
 		return None
 		
 

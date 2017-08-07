@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-# sudo add-apt-repository ppa:kivy-team/kivy
-# sudo apt-get update
-# sudo apt-get install python3-kivy
-# sudo apt-get install python-kivy-examples
+#sudo add-apt-repository ppa:kivy-team/kivy
+#sudo apt-get update
+#sudo apt-get install python3-kivy -y
+#sudo apt-get install python-kivy-examples -y
 
 import kivy
 kivy.require('1.10.0') # replace with your current kivy version !
@@ -19,6 +19,22 @@ from kivy.core.window import Window
 from kivy.config import Config
 
 import numpy as np
+import sys
+import threading
+
+from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
+
+
+metricsFile = ""
+musicPath = ""
+song = None
+if len(sys.argv)>2:
+	musicPath = sys.argv[1]
+	metricsFile = sys.argv[2]
+else:
+	print ("Usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics]")
+	sys.exit(0)
+
 
 class PlayerPanel(BoxLayout):
 	def updatePanels(self,dt):
@@ -27,13 +43,26 @@ class PlayerPanel(BoxLayout):
 		self.updateBandPanel()
 		
 	def updateDancePanel(self):
+		global song
 		self.dancePanel.font_size = (int)(np.min([self.size[1]/2.0,self.size[0]/20.0]))
+		if song:
+			self.dancePanel.text = song.genre
+		else:
+			self.dancePanel.text = "Nothing"
 		
 	def updateTitlePanel(self):
 		self.titlePanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
+		if song:
+			self.titlePanel.text = song.title
+		else:
+			self.titlePanel.text = ""
 		
 	def updateBandPanel(self):
 		self.bandPanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
+		if song:
+			self.bandPanel.text = song.band
+		else:
+			self.bandPanel.text = ""
 
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
@@ -48,11 +77,19 @@ class PlayerPanel(BoxLayout):
 
 	
 class PlaylistPlayer(App):
+	def generateSong(self):
+		global song
+		song = self.playlistGenerator.generateUniqueSong()
+		print ("Generated "+song.title)
+		
 	def build(self):
+		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
 		panel = PlayerPanel(orientation='vertical')
 		#Window.fullscreen = 'auto'
+		t = threading.Thread(target=self.generateSong)
+		t.start()
 		return panel
 		
 if __name__ == '__main__':
-     PlaylistPlayer().run()
+	PlaylistPlayer().run()
 	
