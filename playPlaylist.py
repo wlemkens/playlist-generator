@@ -98,9 +98,10 @@ class PlayerPanel(BoxLayout):
 			self.p.pause()
 			self.paused = True
 	def backward(self):
-		pass
+		self.p.set_time(self.p.get_time()-1000)
 	def forward(self):
-		pass
+		self.p.set_time(self.p.get_time()+1000)
+		
 	def playPrevious(self):
 		global song
 		if self.songIndex>0:
