@@ -68,3 +68,18 @@ But the list will be normalized by the program, so you don't need to keep the to
 * There will be no two times the same dance after eachother.
 * Don't make playlists longer than the music you have, or the program will keep on trying. There is no check on this yet.
 * If you don't have enough songs of a specific dance to fulfil your occurence creterium for the length of your playlist, it will occure less. If the discrepancy is large, this will reduce the performance somewhat, but don't cause any other problems.
+
+## playPlaylist.py
+This program will continuously generate songs that fullfil the given metrics. 
+It will only play a song once and will not play to dances of the same type after eachother.
+
+### Usage
+```
+playPlaylist.py [path/to/music/] [path/to/playlist/metrics]
+```
+
+* path/to/music/ : The directory the songs can be found. The complete underlying tree will be traversed
+* path/to/playlist/metrics : The file containing the metrics for the playlist
+
+### Remarks
+See [staticPlaylistGenerator.py](#markdown-header-metrics) for the explanation about the metrics file.
