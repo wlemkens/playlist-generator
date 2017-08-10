@@ -67,7 +67,7 @@ class PlaylistGenerator(object):
 			print("Error loading file '"+filename+"'")
 		except (KeyError):
 			print("Not found any title tag for '"+filename+"'")
-		return None
+		return os.path.splitext(os.path.basename(filename))[0]
 		
 	def getBand(self,filename):
 		try:
