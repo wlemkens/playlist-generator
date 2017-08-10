@@ -173,13 +173,9 @@ class PlayerPanel(BoxLayout):
 		
 		
 	def playSong(self):
-		print ("Playing song "+str(song))
 		self.p = vlc.MediaPlayer(song.url)
-		print ("Playing song "+str(song))
 		pevent = self.p.event_manager()
-		print ("Playing song "+str(song))
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
-		print ("Playing song "+str(song))
 		self.p.play()
 		
 		
