@@ -66,10 +66,26 @@ class PlayerPanel(BoxLayout):
 			#self.dancePanel.text = "Nothing"
 		
 	def onGenreText(self,instance, value):
-		print('The widget', instance, 'have:', value)
+		#self.songInput.text = ""
+		genres = self.getGenres(value)
+		self.genreListAdapter.data = genres
 		
 	def onSongText(self,instance, value):
-		print('The widget', instance, 'have:', value)
+		songs = self.getSongs(value)
+		self.songListAdapter.data = songs
+		
+	def getGenres(self,filterString):
+		genres = sorted(genre for genre in list(self.playlistGenerator.lookupTable) if filterString in genre)
+		return genres
+		
+	def getSongs(self,filterString):
+		if self.selectedGenre in self.playlistGenerator.lookupTable:
+			songList = [song.title for song in self.playlistGenerator.lookupTable[self.selectedGenre] if filterString in song.title]
+		else:
+			songList = [song.title for songs in list(self.playlistGenerator.lookupTable) for song in self.playlistGenerator.lookupTable[songs] if filterString in song.title]
+		#songList = [song for song in songList if filterString in song]
+		songs = sorted(songList)
+		return songs
 		
 	def selectionChanged(self, *args):
 		if len(args[0].selection)>0:
@@ -83,8 +99,6 @@ class PlayerPanel(BoxLayout):
 			songList = [song.title for songs in list(self.playlistGenerator.lookupTable) for song in self.playlistGenerator.lookupTable[songs]]
 		songs = sorted(songList)
 		self.songListAdapter.data = songs
-		#self.list_view._trigger_reset_populate()
-		print ("'"+self.selectedGenre+"' selected")
 
 	def songSelectionChanged(self, *args):
 		if len(args[0].selection)>0:
@@ -101,22 +115,23 @@ class PlayerPanel(BoxLayout):
 		self.p = None
 		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
 		
-		controlPanel = BoxLayout(orientation='vertical')
+		controlPanel = BoxLayout(orientation='vertical',size_hint=(.3,1))
 		self.add_widget(controlPanel)
-		dataPanel = BoxLayout(orientation='vertical')
+		dataPanel = BoxLayout(orientation='vertical',size_hint=(.7,1))
 		self.add_widget(dataPanel)
 		
 		self.genreInput = TextInput(text='', multiline=False,height=30)
 		self.genreInput.bind(text=self.onGenreText)
 		controlPanel.add_widget(self.genreInput)
 		genres = sorted(list(self.playlistGenerator.lookupTable))
-		dictAdapter = ListAdapter(data=genres,cls=ListItemButton,selection_mode='single')
-		dictAdapter.bind(on_selection_change=self.selectionChanged)
-		self.genreList = ListView(adapter=dictAdapter)
+		self.genreListAdapter = ListAdapter(data=genres,cls=ListItemButton,selection_mode='single')
+		self.genreListAdapter.bind(on_selection_change=self.selectionChanged)
+		self.genreList = ListView(adapter=self.genreListAdapter)
 		controlPanel.add_widget(self.genreList)
-		self.genreInput.height=30
+		self.genreInput.size=(300,30)
+		self.genreInput.size_hint=(1,None)
 		
-		self.songInput = TextInput(text='', multiline=False)
+		self.songInput = TextInput(text='', multiline=False,size=(300,30),size_hint=(1,None))
 		self.songInput.bind(text=self.onSongText)
 		dataPanel.add_widget(self.songInput)
 		songList = []
