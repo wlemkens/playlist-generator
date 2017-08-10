@@ -75,11 +75,15 @@ It will only play a song once and will not play to dances of the same type after
 
 ### Usage
 ```
-playPlaylist.py [path/to/music/] [path/to/playlist/metrics]
+playPlaylist.py [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)> 
 ```
 
 * path/to/music/ : The directory the songs can be found. The complete underlying tree will be traversed
 * path/to/playlist/metrics : The file containing the metrics for the playlist
+* enable announcement 0/1 : Enable or disable the announcements
+* path/to/genres/ : (needed if the announcements are enabled) The directory in which the announcements for the dances can be found.
+* announcement delay (s) : The delay in between the two announcements in seconds (can be floating point)
+
 
 ### Remarks
 See [staticPlaylistGenerator.py](#markdown-header-metrics) for the explanation about the metrics file.
