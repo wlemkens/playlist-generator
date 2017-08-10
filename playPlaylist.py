@@ -29,11 +29,21 @@ from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 metricsFile = ""
 musicPath = ""
 song = None
+genrePath = ""
 if len(sys.argv)>2:
 	musicPath = sys.argv[1]
 	metricsFile = sys.argv[2]
+	enableAnnoucements = True
+	delay = 10.0
+	if len(sys.argv)>3:
+		genrePath = sys.argv[3]
+	if len(sys.argv)>4:
+		delay = float(sys.argv[4])
+	if len(sys.argv)>5:
+		if sys.argv[5]=="0":
+			enableAnnoucements = False
 else:
-	print ("Usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics]")
+	print ("Usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] <path/to/genres/> <announcement delay (s)> <enable announcement 0/1>")
 	sys.exit(0)
 
 
@@ -46,21 +56,21 @@ class PlayerPanel(BoxLayout):
 	def updateDancePanel(self):
 		global song
 		self.dancePanel.font_size = (int)(np.min([self.size[1]/2.0,self.size[0]/20.0]))
-		if song:
+		if song and song.genre:
 			self.dancePanel.text = song.genre
 		else:
 			self.dancePanel.text = "Nothing"
 		
 	def updateTitlePanel(self):
 		self.titlePanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
-		if song:
+		if song and song.title:
 			self.titlePanel.text = song.title
 		else:
 			self.titlePanel.text = ""
 		
 	def updateBandPanel(self):
 		self.bandPanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
-		if song:
+		if song and song.band:
 			self.bandPanel.text = song.band
 		else:
 			self.bandPanel.text = ""
@@ -141,16 +151,50 @@ class PlayerPanel(BoxLayout):
 	def songEndReachedCallback(self,ev):
 		self.generateSong()
 
+	def delayAnnouncement(self,dt):
+		self.playAnnouncement(song.genre)
+		
+	def announcementEndReachedCallback(self,ev):
+		global delay
+		if self.announcementCount > 0:
+			self.announcementCount = 0
+			self.playSong()
+		elif self.announcementCount == 0:
+			self.announcementCount += 1
+			Clock.schedule_once(self.delayAnnouncement, delay)
+		
+	def playAnnouncement(self,genre):
+		global genrePath
+		genreFile = genrePath+"/"+genre+".mp3"
+		self.p = vlc.MediaPlayer(genreFile)
+		pevent = self.p.event_manager()
+		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.announcementEndReachedCallback)
+		self.p.play()
+		
+		
+	def playSong(self):
+		print ("Playing song "+str(song))
+		self.p = vlc.MediaPlayer(song.url)
+		print ("Playing song "+str(song))
+		pevent = self.p.event_manager()
+		print ("Playing song "+str(song))
+		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
+		print ("Playing song "+str(song))
+		self.p.play()
+		
+		
 	def startSong(self,dt):
+		global enableAnnoucements
 		if self.newSong:
 			if self.p:
 				self.p.stop()
-			self.p = vlc.MediaPlayer(song.url)
-			pevent = self.p.event_manager()
-			pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
-			self.p.play()
 			self.newSong = False
 			self.paused = False
+			if enableAnnoucements:
+				self.announcementCount = 0
+				self.playAnnouncement(song.genre)
+			else:
+				self.playSong()
 
 class PlaylistPlayer(App):
 		
