@@ -30,20 +30,20 @@ metricsFile = ""
 musicPath = ""
 song = None
 genrePath = ""
-if len(sys.argv)>2:
+if len(sys.argv)>3:
 	musicPath = sys.argv[1]
 	metricsFile = sys.argv[2]
 	enableAnnoucements = True
 	delay = 10.0
 	if len(sys.argv)>3:
-		genrePath = sys.argv[3]
-	if len(sys.argv)>4:
-		delay = float(sys.argv[4])
-	if len(sys.argv)>5:
-		if sys.argv[5]=="0":
+		if sys.argv[3]=="0":
 			enableAnnoucements = False
+	if len(sys.argv)>4 and enableAnnoucements:
+		genrePath = sys.argv[4]
+	if len(sys.argv)>5:
+		delay = float(sys.argv[5])
 else:
-	print ("Usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] <path/to/genres/> <announcement delay (s)> <enable announcement 0/1>")
+	print ("Usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)>")
 	sys.exit(0)
 
 
