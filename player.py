@@ -28,7 +28,7 @@ import sys
 import threading
 import vlc
 
-from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
+from PlaylistGenerator.MusicLibrary import MusicLibrary
 
 
 
@@ -36,20 +36,10 @@ metricsFile = ""
 musicPath = ""
 song = None
 genrePath = ""
-if len(sys.argv)>3:
+if len(sys.argv)>1:
 	musicPath = sys.argv[1]
-	metricsFile = sys.argv[2]
-	enableAnnoucements = True
-	delay = 10.0
-	if len(sys.argv)>3:
-		if sys.argv[3]=="0":
-			enableAnnoucements = False
-	if len(sys.argv)>4 and enableAnnoucements:
-		genrePath = sys.argv[4]
-	if len(sys.argv)>5:
-		delay = float(sys.argv[5])
 else:
-	print ("Usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)>")
+	print ("Usage "+sys.argv[0]+" [path/to/music/]")
 	sys.exit(0)
 
 
@@ -75,14 +65,14 @@ class PlayerPanel(BoxLayout):
 		self.songListAdapter.data = songs
 		
 	def getGenres(self,filterString):
-		genres = sorted(genre for genre in list(self.playlistGenerator.lookupTable) if filterString in genre)
+		genres = sorted(genre for genre in list(self.library.lookupTable) if filterString in genre)
 		return genres
 		
 	def getSongs(self,filterString):
-		if self.selectedGenre in self.playlistGenerator.lookupTable:
-			songList = [song.title for song in self.playlistGenerator.lookupTable[self.selectedGenre] if filterString in song.title]
+		if self.selectedGenre in self.library.lookupTable:
+			songList = [song.title for song in self.library.lookupTable[self.selectedGenre] if filterString in song.title]
 		else:
-			songList = [song.title for songs in list(self.playlistGenerator.lookupTable) for song in self.playlistGenerator.lookupTable[songs] if filterString in song.title]
+			songList = [song.title for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs] if filterString in song.title]
 		#songList = [song for song in songList if filterString in song]
 		songs = sorted(songList)
 		return songs
@@ -93,16 +83,23 @@ class PlayerPanel(BoxLayout):
 		else:
 			self.selectedGenre = ""
 		songList = []
-		if self.selectedGenre in self.playlistGenerator.lookupTable:
-			songList = [song.title for song in self.playlistGenerator.lookupTable[self.selectedGenre]]
+		if self.selectedGenre in self.library.lookupTable:
+			songList = [song.title for song in self.library.lookupTable[self.selectedGenre]]
 		else:
-			songList = [song.title for songs in list(self.playlistGenerator.lookupTable) for song in self.playlistGenerator.lookupTable[songs]]
+			songList = [song.title for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs]]
 		songs = sorted(songList)
 		self.songListAdapter.data = songs
 
 	def songSelectionChanged(self, *args):
+		global song
 		if len(args[0].selection)>0:
 			self.selectedSong = args[0].selection[0].text
+			for testSong in self.library.lookupTable[self.selectedGenre]:
+				if testSong.title == self.selectedSong:
+					song = testSong
+					break
+			self.newSong = True
+			self.startSong()
 
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
@@ -113,7 +110,7 @@ class PlayerPanel(BoxLayout):
 		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
 		self.p = None
-		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
+		self.library = MusicLibrary(musicPath)
 		
 		controlPanel = BoxLayout(orientation='vertical',size_hint=(.3,1))
 		self.add_widget(controlPanel)
@@ -123,7 +120,7 @@ class PlayerPanel(BoxLayout):
 		self.genreInput = TextInput(text='', multiline=False,height=30)
 		self.genreInput.bind(text=self.onGenreText)
 		controlPanel.add_widget(self.genreInput)
-		genres = sorted(list(self.playlistGenerator.lookupTable))
+		genres = sorted(list(self.library.lookupTable))
 		self.genreListAdapter = ListAdapter(data=genres,cls=ListItemButton,selection_mode='single')
 		self.genreListAdapter.bind(on_selection_change=self.selectionChanged)
 		self.genreList = ListView(adapter=self.genreListAdapter)
@@ -136,11 +133,11 @@ class PlayerPanel(BoxLayout):
 		dataPanel.add_widget(self.songInput)
 		songList = []
 		print ()
-		if self.selectedGenre in self.playlistGenerator.lookupTable:
-			songList = [song.title for song in self.playlistGenerator.lookupTable[self.selectedGenre]]
+		if self.selectedGenre in self.library.lookupTable:
+			songList = [song.title for song in self.library.lookupTable[self.selectedGenre]]
 		else:
-			songList = [song.title for songs in list(self.playlistGenerator.lookupTable) for song in self.playlistGenerator.lookupTable[songs]]
-			#songList = [songs for songs in list(self.playlistGenerator.lookupTable)]
+			songList = [song.title for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs]]
+			#songList = [songs for songs in list(self.library.lookupTable)]
 		songs = sorted(songList)
 		self.songListAdapter = ListAdapter(data=songs,cls=ListItemButton,selection_mode='single')
 		self.songListAdapter.bind(on_selection_change=self.songSelectionChanged)
@@ -148,9 +145,6 @@ class PlayerPanel(BoxLayout):
 		dataPanel.add_widget(self.songList)
 		
 		self.paused = True
-		t = threading.Thread(target=self.generateSong)
-		t.start()
-		event = Clock.schedule_interval(self.startSong, 1 / 30.)
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
 
 	def _keyboard_closed(self):
@@ -173,13 +167,13 @@ class PlayerPanel(BoxLayout):
 		global song
 		if self.songIndex>0:
 			self.songIndex -= 1
-			song = self.playlistGenerator.songList[self.songIndex]
+			song = self.library.songList[self.songIndex]
 			self.newSong = True
 	def playNext(self):
 		global song
-		if self.songIndex<len(self.playlistGenerator.songList)-1:
+		if self.songIndex<len(self.library.songList)-1:
 			self.songIndex += 1
-			song = self.playlistGenerator.songList[self.songIndex]
+			song = self.library.songList[self.songIndex]
 			self.newSong = True
 		else:
 			self.generateSong()
@@ -199,36 +193,9 @@ class PlayerPanel(BoxLayout):
 					self.playNext()
 			return True
 
-	def generateSong(self):
-		global song
-		song = self.playlistGenerator.generateUniqueSong()
-		self.newSong = True
-		self.songIndex += 1
-	
 	def songEndReachedCallback(self,ev):
 		self.generateSong()
 
-	def delayAnnouncement(self,dt):
-		self.playAnnouncement(song.genre)
-		
-	def announcementEndReachedCallback(self,ev):
-		global delay
-		if self.announcementCount > 0:
-			self.announcementCount = 0
-			self.playSong()
-		elif self.announcementCount == 0:
-			self.announcementCount += 1
-			Clock.schedule_once(self.delayAnnouncement, delay)
-		
-	def playAnnouncement(self,genre):
-		global genrePath
-		genreFile = genrePath+"/"+genre+".mp3"
-		self.p = vlc.MediaPlayer(genreFile)
-		pevent = self.p.event_manager()
-		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.announcementEndReachedCallback)
-		self.p.play()
-		
-		
 	def playSong(self):
 		self.p = vlc.MediaPlayer(song.url)
 		pevent = self.p.event_manager()
@@ -236,18 +203,13 @@ class PlayerPanel(BoxLayout):
 		self.p.play()
 		
 		
-	def startSong(self,dt):
-		global enableAnnoucements
+	def startSong(self):
 		if self.newSong:
 			if self.p:
 				self.p.stop()
 			self.newSong = False
 			self.paused = False
-			if enableAnnoucements:
-				self.announcementCount = 0
-				self.playAnnouncement(song.genre)
-			else:
-				self.playSong()
+			self.playSong()
 
 class PlaylistPlayer(App):
 		
