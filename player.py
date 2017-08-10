@@ -94,6 +94,7 @@ class PlayerPanel(BoxLayout):
 		global song
 		if len(args[0].selection)>0:
 			self.selectedSong = args[0].selection[0].text
+			self.selectedSongIndex = args[0].selection[0].index
 			for testSong in self.library.lookupTable[self.selectedGenre]:
 				if testSong.title == self.selectedSong:
 					song = testSong
@@ -111,6 +112,7 @@ class PlayerPanel(BoxLayout):
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
 		self.p = None
 		self.library = MusicLibrary(musicPath)
+		self.selectedSongIndex=0
 		
 		controlPanel = BoxLayout(orientation='vertical',size_hint=(.3,1))
 		self.add_widget(controlPanel)
@@ -132,7 +134,6 @@ class PlayerPanel(BoxLayout):
 		self.songInput.bind(text=self.onSongText)
 		dataPanel.add_widget(self.songInput)
 		songList = []
-		print ()
 		if self.selectedGenre in self.library.lookupTable:
 			songList = [song.title for song in self.library.lookupTable[self.selectedGenre]]
 		else:
@@ -164,19 +165,16 @@ class PlayerPanel(BoxLayout):
 		self.p.set_time(self.p.get_time()+1000)
 		
 	def playPrevious(self):
-		global song
-		if self.songIndex>0:
-			self.songIndex -= 1
-			song = self.library.songList[self.songIndex]
-			self.newSong = True
+		if self.songList._count>0:
+			selectedSongIndex = (self.selectedSongIndex-1) % self.songList._count
+		song = self.songListAdapter.get_view(selectedSongIndex)
+		self.songListAdapter.handle_selection(song)
+
 	def playNext(self):
-		global song
-		if self.songIndex<len(self.library.songList)-1:
-			self.songIndex += 1
-			song = self.library.songList[self.songIndex]
-			self.newSong = True
-		else:
-			self.generateSong()
+		if self.songList._count>0:
+			selectedSongIndex = (self.selectedSongIndex+1) % self.songList._count
+		song = self.songListAdapter.get_view(selectedSongIndex)
+		self.songListAdapter.handle_selection(song)
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 			if keycode[1] == 'spacebar':
