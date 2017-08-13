@@ -2,7 +2,7 @@
 
 scottish = 2
 wals = 1
-mazurka = 2
+mazurka = 1
 wals in 5 = 0.1
 wals in 8 = 0.1
 wals in 11 = 0.1
@@ -26,7 +26,7 @@ marchoise = 0.5
 madison = 0.1
 pas d'été = 1
 plinn = 1
-polska = 0.1
+polska = 0.05
 polka = 1
 reels = 0.5
 ridée = 0.1
