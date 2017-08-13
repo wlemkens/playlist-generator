@@ -95,10 +95,17 @@ class PlayerPanel(BoxLayout):
 		if len(args[0].selection)>0:
 			self.selectedSong = args[0].selection[0].text
 			self.selectedSongIndex = args[0].selection[0].index
-			for testSong in self.library.lookupTable[self.selectedGenre]:
-				if testSong.title == self.selectedSong:
-					song = testSong
-					break
+			if (self.selectedGenre):
+				for testSong in self.library.lookupTable[self.selectedGenre]:
+					if testSong.title == self.selectedSong:
+						song = testSong
+						break
+			else:
+				for key,value in self.library.lookupTable.items():
+					for testSong in value:
+						if testSong.title == self.selectedSong:
+							song = testSong
+							break
 			self.newSong = True
 			self.startSong()
 
