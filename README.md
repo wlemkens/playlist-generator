@@ -10,7 +10,9 @@ There should be no OS dependend prerequisites however, so if you managed to inst
 Taglib, Mutagen, PyDub and Kivy
 
 ```
-sudo apt install python3-taglib python3-mutagen
+sudo apt install git
+sudo apt install python3-pip
+sudo apt install python3-taglib python3-mutagen ffmpeg python3-numpy libvlc-dev vlc
 sudo pip3 install pydub
 sudo add-apt-repository ppa:kivy-team/kivy
 sudo apt-get update
