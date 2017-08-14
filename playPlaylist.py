@@ -17,6 +17,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ListProperty
 from kivy.core.window import Window
 from kivy.config import Config
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.textinput import TextInput
 
 import numpy as np
 import sys
@@ -43,15 +45,20 @@ if len(sys.argv)>3:
 	if len(sys.argv)>5:
 		delay = float(sys.argv[5])
 else:
-	print ("Usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)>")
-	sys.exit(0)
+	print ("CLI usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)>")
 
 
 class PlayerPanel(BoxLayout):
 	def updatePanels(self,dt):
+		self.updateAnnouncementsPanel()
 		self.updateDancePanel()
 		self.updateTitlePanel()
 		self.updateBandPanel()
+		
+	def updateAnnouncementsPanel(self):
+		self.announcementBtnLbl.text_size=self.announcementBtnLbl.size
+		self.announcementChkLbl.text_size=self.announcementChkLbl.size
+		self.enableAnnoucementsChk.active = enableAnnoucements
 		
 	def updateDancePanel(self):
 		global song
@@ -75,6 +82,19 @@ class PlayerPanel(BoxLayout):
 		else:
 			self.bandPanel.text = ""
 
+	def onCheckboxActive(self,checkbox,value):
+		global enableAnnoucements
+		enableAnnoucements = value
+		
+	def loadMusic(self,instance,value):
+		pass
+	def loadMetrics(self,instance,value):
+		pass
+	def loadAnnouncements(self,instance,value):
+		pass
+	def onDelayText(self,instance,value):
+		pass
+	
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
 		
@@ -84,6 +104,24 @@ class PlayerPanel(BoxLayout):
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
 		self.p = None
 		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
+		self.menuPanel = BoxLayout(height=30,size_hint=(1,None))
+		self.add_widget(self.menuPanel)
+		self.loadMusicBtn = Button(text="Load music",on_press=self.loadMusic)
+		self.menuPanel.add_widget(self.loadMusicBtn)
+		self.loadMetricsBtn = Button(text="Load metrics",on_press=self.loadMetrics)
+		self.menuPanel.add_widget(self.loadMetricsBtn)
+		self.loadAnnouncementsBtn = Button(text="Load announcements",on_press=self.loadAnnouncements)
+		self.menuPanel.add_widget(self.loadAnnouncementsBtn)
+		self.announcementBtnLbl = Label(text="Announcement delay",halign="right",valign="center")
+		self.menuPanel.add_widget(self.announcementBtnLbl)
+		self.announcementDelayInput = TextInput(text='', multiline=False,size=(100,30),size_hint=(None,None),input_filter='float')
+		self.announcementDelayInput.bind(text=self.onDelayText)
+		self.menuPanel.add_widget(self.announcementDelayInput)
+		self.announcementChkLbl = Label(text="Enable announcements",halign="right",valign="center")
+		self.menuPanel.add_widget(self.announcementChkLbl)
+		self.enableAnnoucementsChk = CheckBox(size=(30,30),size_hint=(None,None))
+		self.enableAnnoucementsChk.bind(active=self.onCheckboxActive)
+		self.menuPanel.add_widget(self.enableAnnoucementsChk)
 		self.dancePanel = Label(text="Test")
 		self.add_widget(self.dancePanel)
 		self.titlePanel = Label(text="Test")
@@ -128,6 +166,8 @@ class PlayerPanel(BoxLayout):
 			self.generateSong()
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+			if keycode[1] == 'escape':
+				sys.exit(0)
 			if keycode[1] == 'spacebar':
 				self.pause()
 			elif keycode[1] == 'left':
