@@ -14,12 +14,15 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import ListProperty
 from kivy.core.window import Window
 from kivy.config import Config
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.textinput import TextInput
-
+from kivy.properties import ObjectProperty
+from kivy.uix.popup import Popup
+from kivy.uix.filechooser import FileChooserListView
 import numpy as np
 import sys
 import threading
@@ -47,7 +50,35 @@ if len(sys.argv)>3:
 else:
 	print ("CLI usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)>")
 
+class LoadDialog(FloatLayout):
+	load = ObjectProperty(None)
+	cancel = ObjectProperty(None)
 
+	def updatePanels(self,dt):
+		self.mainPanel.pos=self.pos
+	
+	def loadMusic(self,button):
+		self.load(self.fileView.path, self.fileView.selection)
+		
+	def __init__(self, **kwargs):
+		super(LoadDialog, self).__init__(**kwargs)
+		self.mainPanel = BoxLayout(size=self.size,orientation="vertical")
+		self.add_widget(self.mainPanel)
+		
+		self.fileView = FileChooserListView()
+		self.mainPanel.add_widget(self.fileView)
+		
+		buttonPanel = BoxLayout(size_hint_y=None,height=30)
+		self.mainPanel.add_widget(buttonPanel)
+		cancelBtn = Button(text="Cancel")
+		cancelBtn.bind(on_release=self.cancel)
+		buttonPanel.add_widget(cancelBtn)
+		loadBtn = Button(text="Load")
+		loadBtn.bind(on_release=self.loadMusic)
+		buttonPanel.add_widget(loadBtn)
+		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
+		
+    
 class PlayerPanel(BoxLayout):
 	def updatePanels(self,dt):
 		self.updateAnnouncementsPanel()
@@ -59,6 +90,7 @@ class PlayerPanel(BoxLayout):
 		self.announcementBtnLbl.text_size=self.announcementBtnLbl.size
 		self.announcementChkLbl.text_size=self.announcementChkLbl.size
 		self.enableAnnoucementsChk.active = enableAnnoucements
+		self.announcementDelayInput.text = str(delay)
 		
 	def updateDancePanel(self):
 		global song
@@ -86,14 +118,27 @@ class PlayerPanel(BoxLayout):
 		global enableAnnoucements
 		enableAnnoucements = value
 		
-	def loadMusic(self,instance,value):
+	def dismiss_popup(self):
+		self._popup.dismiss()
+		
+	def load(self, path, filename):
+		print("'"+path+"', '"+str(filename)+"'")
 		pass
-	def loadMetrics(self,instance,value):
+            
+	def loadMusic(self,instance):
+		content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
+		self._popup = Popup(title="Load file", content=content,
+												size_hint=(0.9, 0.9))
+		self._popup.open()
+        
+	def loadMetrics(self,instance):
 		pass
-	def loadAnnouncements(self,instance,value):
+	def loadAnnouncements(self,instance):
 		pass
 	def onDelayText(self,instance,value):
-		pass
+		global delay
+		if self.announcementDelayInput.text:
+			delay = float(self.announcementDelayInput.text)
 	
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
@@ -114,7 +159,7 @@ class PlayerPanel(BoxLayout):
 		self.menuPanel.add_widget(self.loadAnnouncementsBtn)
 		self.announcementBtnLbl = Label(text="Announcement delay",halign="right",valign="center")
 		self.menuPanel.add_widget(self.announcementBtnLbl)
-		self.announcementDelayInput = TextInput(text='', multiline=False,size=(100,30),size_hint=(None,None),input_filter='float')
+		self.announcementDelayInput = TextInput(text='', multiline=False,size=(100,30),size_hint=(None,None),input_filter='float',unfocus_on_touch=True)
 		self.announcementDelayInput.bind(text=self.onDelayText)
 		self.menuPanel.add_widget(self.announcementDelayInput)
 		self.announcementChkLbl = Label(text="Enable announcements",halign="right",valign="center")
