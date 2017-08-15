@@ -29,6 +29,13 @@ class PlaylistGenerator(object):
 		self.songList = []
 		
 
+	def setMusicPath(self,musicPath):
+		self.library = MusicLibrary(musicPath)
+	
+	def setMetrics(self,playlistMetricsFile):
+		self.playlistMetrics.load(playlistMetricsFile)
+		
+		
 	def generateSong(self):
 		value = random.random()
 		for item in self.playlistMetrics.cumulativeList:

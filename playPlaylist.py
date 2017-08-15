@@ -23,12 +23,17 @@ from kivy.uix.textinput import TextInput
 from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.filechooser import FileChooserListView
+
+
 import numpy as np
 import sys
 import threading
 import vlc
+from os.path import join, isdir
+import os
 
 from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
+from Tools import DirectoryTools
 
 
 metricsFile = ""
@@ -53,6 +58,9 @@ else:
 class LoadDialog(FloatLayout):
 	load = ObjectProperty(None)
 	cancel = ObjectProperty(None)
+	
+	def is_dir(self, directory, filename):
+		return isdir(join(directory, filename))
 
 	def updatePanels(self,dt):
 		self.mainPanel.pos=self.pos
@@ -65,7 +73,7 @@ class LoadDialog(FloatLayout):
 		self.mainPanel = BoxLayout(size=self.size,orientation="vertical")
 		self.add_widget(self.mainPanel)
 		
-		self.fileView = FileChooserListView()
+		self.fileView = FileChooserListView(filters=[self.is_dir])
 		self.mainPanel.add_widget(self.fileView)
 		
 		buttonPanel = BoxLayout(size_hint_y=None,height=30)
@@ -121,20 +129,50 @@ class PlayerPanel(BoxLayout):
 	def dismiss_popup(self):
 		self._popup.dismiss()
 		
-	def load(self, path, filename):
-		print("'"+path+"', '"+str(filename)+"'")
-		pass
+	def loadMusicPath(self, path, filename):
+		#print("'"+path+"', '"+str(filename)+"'")
+		global musicPath
+		musicPath = path
+		self.dismiss_popup()
+		self.playlistGenerator.setMusicPath(musicPath)
             
+	def loadAnnouncementPath(self, path, filename):
+		global genrePath
+		genrePath = path
+		self.dismiss_popup()
+
+	def loadMetricsFile(self, path, filename):
+		global metricsFile
+		metricsFile = filename[0]
+		self.dismiss_popup()
+		self.playlistGenerator.setMetrics(metricsFile)
+
 	def loadMusic(self,instance):
-		content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
-		self._popup = Popup(title="Load file", content=content,
+		content = LoadDialog(load=self.loadMusicPath, cancel=self.dismiss_popup)
+		content.fileView.path = musicPath
+		
+		self._popup = Popup(title="Load music", content=content,
 												size_hint=(0.9, 0.9))
 		self._popup.open()
-        
+	
+	def isMetricsFile(self,diretory,filename):
+		return DirectoryTools.getFileType(filename)=="metrics"
+	
 	def loadMetrics(self,instance):
-		pass
+		content = LoadDialog(load=self.loadMetricsFile, cancel=self.dismiss_popup)
+		content.fileView.filters = [self.isMetricsFile]
+		content.fileView.path = os.path.dirname(os.path.abspath(metricsFile))
+		self._popup = Popup(title="Load playlist metrics", content=content,
+												size_hint=(0.9, 0.9))
+		self._popup.open()
+		
 	def loadAnnouncements(self,instance):
-		pass
+		content = LoadDialog(load=self.loadAnnouncementPath, cancel=self.dismiss_popup)
+		content.fileView.path = genrePath
+		self._popup = Popup(title="Load annmouncements", content=content,
+												size_hint=(0.9, 0.9))
+		self._popup.open()
+		
 	def onDelayText(self,instance,value):
 		global delay
 		if self.announcementDelayInput.text:
