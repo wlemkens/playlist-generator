@@ -31,6 +31,7 @@ import threading
 import vlc
 from os.path import join, isdir
 import os
+import time
 
 from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 from Tools import DirectoryTools
@@ -180,8 +181,7 @@ class PlayerPanel(BoxLayout):
 	
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
-		
-		self.newSong = False
+		self.state = 0
 		self.songIndex = -1
 		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
@@ -211,10 +211,10 @@ class PlayerPanel(BoxLayout):
 		self.add_widget(self.titlePanel)
 		self.bandPanel = Label(text="Test")
 		self.add_widget(self.bandPanel)
-		self.paused = True
+		self.paused = False
 		t = threading.Thread(target=self.generateSong)
 		t.start()
-		event = Clock.schedule_interval(self.startSong, 1 / 30.)
+		event = Clock.schedule_interval(self.songStatusCallback, 1 / 30.)
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
 
 	def _keyboard_closed(self):
@@ -223,10 +223,15 @@ class PlayerPanel(BoxLayout):
 
 	def pause(self):
 		if self.paused:
-			self.p.play()
+			if self.state==5:
+				self.announcementPauseStart+= time.time() - self.pauseStart
+			if self.state in [3,6,9]:
+				self.p.play()
 			self.paused = False
 		else:
-			self.p.pause()
+			self.pauseStart = time.time()
+			if self.state in [3,6,9]:
+				self.p.pause()
 			self.paused = True
 	def backward(self):
 		self.p.set_time(self.p.get_time()-1000)
@@ -239,6 +244,8 @@ class PlayerPanel(BoxLayout):
 			self.songIndex -= 1
 			song = self.playlistGenerator.songList[self.songIndex]
 			self.newSong = True
+		self.state = 1
+			
 	def playNext(self):
 		global song
 		if self.songIndex<len(self.playlistGenerator.songList)-1:
@@ -247,6 +254,7 @@ class PlayerPanel(BoxLayout):
 			self.newSong = True
 		else:
 			self.generateSong()
+		self.state = 1
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 			if keycode[1] == 'escape':
@@ -268,27 +276,25 @@ class PlayerPanel(BoxLayout):
 	def generateSong(self):
 		global song
 		song = self.playlistGenerator.generateUniqueSong()
-		self.newSong = True
 		self.songIndex += 1
+		self.state = 1
 	
 	def songEndReachedCallback(self,ev):
 		self.generateSong()
+		self.state = 1
 
 	def delayAnnouncement(self,dt):
-		self.playAnnouncement(song.genre)
+		self.state += 1
 		
 	def announcementEndReachedCallback(self,ev):
-		global delay
-		if self.announcementCount > 0:
-			self.announcementCount = 0
-			self.playSong()
-		elif self.announcementCount == 0:
-			self.announcementCount += 1
-			Clock.schedule_once(self.delayAnnouncement, delay)
+		print("Announcement end")
+		self.state += 1
 		
 	def playAnnouncement(self,genre):
 		global genrePath
 		genreFile = genrePath+"/"+genre+".mp3"
+		if self.p:
+			self.p.stop()
 		self.p = vlc.MediaPlayer(genreFile)
 		pevent = self.p.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.announcementEndReachedCallback)
@@ -296,23 +302,37 @@ class PlayerPanel(BoxLayout):
 		
 		
 	def playSong(self):
+		if self.p:
+			self.p.stop()
 		self.p = vlc.MediaPlayer(song.url)
 		pevent = self.p.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
 		self.p.play()
 		
 		
-	def startSong(self,dt):
-		global enableAnnoucements
-		if self.newSong:
-			if self.p:
-				self.p.stop()
-			self.newSong = False
-			self.paused = False
-			if enableAnnoucements:
-				self.announcementCount = 0
+	def songStatusCallback(self,dt):
+		global enableAnnoucements,delay
+		print("State : "+str(self.state))
+		if not self.paused:
+			if self.state==1:
+				if enableAnnoucements:
+					self.state=2
+				else:
+					self.state=8
+			if self.state==2:
+				self.state+=1
 				self.playAnnouncement(song.genre)
-			else:
+			if self.state==4:
+				self.state+=1
+				self.announcementPauseStart = time.time()
+			if self.state==5:
+				if time.time() - self.announcementPauseStart >= delay:
+					self.state+=1
+			if self.state==6:
+				self.state+=1
+				self.playAnnouncement(song.genre)
+			if self.state==8:
+				self.state+=1
 				self.playSong()
 
 class PlaylistPlayer(App):
