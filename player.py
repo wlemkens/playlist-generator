@@ -22,7 +22,9 @@ from kivy.uix.listview import ListView
 from kivy.adapters.dictadapter import DictAdapter
 from kivy.adapters.listadapter import ListAdapter
 from kivy.uix.listview import ListItemButton
-
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.togglebutton import ToggleButton
 import numpy as np
 import sys
 import threading
@@ -60,20 +62,41 @@ class PlayerPanel(BoxLayout):
 		genres = self.getGenres(value)
 		self.genreListAdapter.data = genres
 		
-	def onSongText(self,instance, value):
-		songs = self.getSongs(value)
-		self.songListAdapter.data = songs
+	def onSongTitleText(self,instance, value):
+		self.titleFilter = value
+		songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
+		self.populateSongList(songs)
+		
+	def onBandNameText(self,instance, value):
+		self.bandFilter = value
+		songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
+		self.populateSongList(songs)
+		
+	def populateSongList(self,songs):
+		self.songListGrid.clear_widgets()
+		index = 0
+		for song in songs:
+			songBtn = ToggleButton(text=song.title, size_hint_y=None, height=25,group='song')
+			songBtn.bind(on_release=self.songSelectionChanged)
+			songBtn.item=song
+			songBtn.index = index
+			index+=1
+			bandLbl = Label(text=song.band,size_hint_x=0.4, width=150)
+			durationLbl = Label(text=song.duration(),size_hint_x=None, width=70)
+			self.songListGrid.add_widget(songBtn)
+			self.songListGrid.add_widget(bandLbl)
+			self.songListGrid.add_widget(durationLbl)
+		
 		
 	def getGenres(self,filterString):
 		genres = sorted(genre for genre in list(self.library.lookupTable) if filterString in genre)
 		return genres
 		
-	def getSongs(self,filterString):
+	def getFilteredSongs(self,nameFilterString,bandFilterString):
 		if self.selectedGenre in self.library.lookupTable:
-			songList = [song.title for song in self.library.lookupTable[self.selectedGenre] if filterString in song.title]
+			songList = [song for song in self.library.lookupTable[self.selectedGenre] if nameFilterString in song.title and bandFilterString in song.band]
 		else:
-			songList = [song.title for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs] if filterString in song.title]
-		#songList = [song for song in songList if filterString in song]
+			songList = [song for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs] if nameFilterString in song.title and bandFilterString in song.band]
 		songs = sorted(songList)
 		return songs
 		
@@ -82,36 +105,32 @@ class PlayerPanel(BoxLayout):
 			self.selectedGenre = args[0].selection[0].text
 		else:
 			self.selectedGenre = ""
-		songList = []
-		if self.selectedGenre in self.library.lookupTable:
-			songList = [song.title for song in self.library.lookupTable[self.selectedGenre]]
-		else:
-			songList = [song.title for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs]]
-		songs = sorted(songList)
-		self.songListAdapter.data = songs
+		songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
+		self.populateSongList(songs)
 
-	def songSelectionChanged(self, *args):
+	def songSelectionChanged(self, button):
 		global song
-		if len(args[0].selection)>0:
-			self.selectedSong = args[0].selection[0].text
-			self.selectedSongIndex = args[0].selection[0].index
-			if (self.selectedGenre):
-				for testSong in self.library.lookupTable[self.selectedGenre]:
+		self.selectedSong = button.item.title
+		self.selectedSongIndex = button.index
+		if (self.selectedGenre):
+			for testSong in self.library.lookupTable[self.selectedGenre]:
+				if testSong.title == self.selectedSong:
+					song = testSong
+					break
+		else:
+			for key,value in self.library.lookupTable.items():
+				for testSong in value:
 					if testSong.title == self.selectedSong:
 						song = testSong
 						break
-			else:
-				for key,value in self.library.lookupTable.items():
-					for testSong in value:
-						if testSong.title == self.selectedSong:
-							song = testSong
-							break
-			self.newSong = True
-			self.startSong()
+		self.newSong = True
+		self.startSong()
 
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
-		
+
+		self.titleFilter = ""
+		self.bandFilter = ""
 		self.newSong = False
 		self.songIndex = -1
 		self.selectedGenre=""
@@ -125,6 +144,10 @@ class PlayerPanel(BoxLayout):
 		self.add_widget(controlPanel)
 		dataPanel = BoxLayout(orientation='vertical',size_hint=(.7,1))
 		self.add_widget(dataPanel)
+		filterPanel = BoxLayout()
+		filterPanel.size=(300,30)
+		filterPanel.size_hint=(1,None)
+		dataPanel.add_widget(filterPanel)
 		
 		self.genreInput = TextInput(text='', multiline=False,height=30)
 		self.genreInput.bind(text=self.onGenreText)
@@ -137,20 +160,28 @@ class PlayerPanel(BoxLayout):
 		self.genreInput.size=(300,30)
 		self.genreInput.size_hint=(1,None)
 		
-		self.songInput = TextInput(text='', multiline=False,size=(300,30),size_hint=(1,None))
-		self.songInput.bind(text=self.onSongText)
-		dataPanel.add_widget(self.songInput)
+		self.songInput = TextInput(text='')
+		self.songInput.bind(text=self.onSongTitleText)
+		filterPanel.add_widget(self.songInput)
+		self.bandInput = TextInput(text='', multiline=False,size=(300,30),size_hint=(.4,None))
+		self.bandInput.bind(text=self.onBandNameText)
+		filterPanel.add_widget(self.bandInput)
+		placeholder = Label(size_hint_x=None, width=70)
+		filterPanel.add_widget(placeholder)
+		
+		
 		songList = []
 		if self.selectedGenre in self.library.lookupTable:
-			songList = [song.title for song in self.library.lookupTable[self.selectedGenre]]
+			songList = self.library.lookupTable[self.selectedGenre]
 		else:
-			songList = [song.title for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs]]
-			#songList = [songs for songs in list(self.library.lookupTable)]
+			songList = [song for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs]]
 		songs = sorted(songList)
-		self.songListAdapter = ListAdapter(data=songs,cls=ListItemButton,selection_mode='single')
-		self.songListAdapter.bind(on_selection_change=self.songSelectionChanged)
-		self.songList = ListView(adapter=self.songListAdapter)
-		dataPanel.add_widget(self.songList)
+		self.songListGrid = GridLayout(cols=3, size_hint_y=None)
+		self.songListGrid.bind(minimum_height=self.songListGrid.setter('height'))
+		self.populateSongList(songs)
+		self.songListView = ScrollView()
+		dataPanel.add_widget(self.songListView)
+		self.songListView.add_widget(self.songListGrid)
 		
 		self.paused = True
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
@@ -174,14 +205,14 @@ class PlayerPanel(BoxLayout):
 	def playPrevious(self):
 		if self.songList._count>0:
 			selectedSongIndex = (self.selectedSongIndex-1) % self.songList._count
-		song = self.songListAdapter.get_view(selectedSongIndex)
-		self.songListAdapter.handle_selection(song)
+		#song = self.songListAdapter.get_view(selectedSongIndex)
+		#self.songListAdapter.handle_selection(song)
 
 	def playNext(self):
 		if self.songList._count>0:
 			selectedSongIndex = (self.selectedSongIndex+1) % self.songList._count
-		song = self.songListAdapter.get_view(selectedSongIndex)
-		self.songListAdapter.handle_selection(song)
+		#song = self.songListAdapter.get_view(selectedSongIndex)
+		#self.songListAdapter.handle_selection(song)
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 			if keycode[1] == 'spacebar':
