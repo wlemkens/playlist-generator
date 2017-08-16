@@ -75,6 +75,8 @@ But the list will be normalized by the program, so you don't need to keep the to
 This program will continuously generate songs that fullfil the given metrics. 
 It will only play a song once and will not play to dances of the same type after eachother.
 
+![playPlaylist.py](Documentation/playPlaylist.png)
+
 ### Usage
 ```
 playPlaylist.py [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)> 
@@ -89,3 +91,14 @@ playPlaylist.py [path/to/music/] [path/to/playlist/metrics] [enable announcement
 
 ### Remarks
 See [staticPlaylistGenerator.py](#markdown-header-metrics) for the explanation about the metrics file.
+
+## player.py
+This program will generate a list of the different dances and allow you to filter on them.
+
+![player.py](Documentation/player.png)
+
+### Usage
+```
+player.py [path/to/music/]
+```
+* path/to/music/ : The directory the songs can be found. The complete underlying tree will be traversed
