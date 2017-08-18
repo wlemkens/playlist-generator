@@ -35,7 +35,7 @@ import time
 
 from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 from Tools import DirectoryTools
-
+from Gui.TimeSlider import TimeSlider
 
 metricsFile = ""
 musicPath = ""
@@ -94,6 +94,7 @@ class PlayerPanel(BoxLayout):
 		self.updateDancePanel()
 		self.updateTitlePanel()
 		self.updateBandPanel()
+		self.updateSliderPanel()
 		
 	def updateAnnouncementsPanel(self):
 		self.announcementBtnLbl.text_size=self.announcementBtnLbl.size
@@ -109,6 +110,11 @@ class PlayerPanel(BoxLayout):
 		else:
 			self.dancePanel.text = "Nothing"
 		
+	def updateSliderPanel(self):
+		global song
+		self.timeSlider.font_size = (int)(np.min([self.size[1]/2.0,self.size[0]/60.0]))
+		self.timeSlider.value = self.p.get_time()/1000
+
 	def updateTitlePanel(self):
 		self.titlePanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
 		if song and song.title:
@@ -211,6 +217,9 @@ class PlayerPanel(BoxLayout):
 		self.add_widget(self.titlePanel)
 		self.bandPanel = Label(text="Test")
 		self.add_widget(self.bandPanel)
+		
+		self.timeSlider = TimeSlider(max=100)
+		self.add_widget(self.timeSlider)
 		self.paused = False
 		t = threading.Thread(target=self.generateSong)
 		t.start()
@@ -278,6 +287,8 @@ class PlayerPanel(BoxLayout):
 		song = self.playlistGenerator.generateUniqueSong()
 		self.songIndex += 1
 		self.state = 1
+		self.timeSlider.max = song.length
+		self.timeSlider.value=0
 	
 	def songEndReachedCallback(self,ev):
 		self.generateSong()
@@ -287,7 +298,6 @@ class PlayerPanel(BoxLayout):
 		self.state += 1
 		
 	def announcementEndReachedCallback(self,ev):
-		print("Announcement end")
 		self.state += 1
 		
 	def playAnnouncement(self,genre):
@@ -312,7 +322,6 @@ class PlayerPanel(BoxLayout):
 		
 	def songStatusCallback(self,dt):
 		global enableAnnoucements,delay
-		print("State : "+str(self.state))
 		if not self.paused:
 			if self.state==1:
 				if enableAnnoucements:
@@ -340,7 +349,7 @@ class PlaylistPlayer(App):
 	def build(self):
 		self.newSong = False
 		self.panel = PlayerPanel(orientation='vertical')
-		Window.fullscreen = 'auto'
+		#Window.fullscreen = 'auto'
 		return self.panel
 
 
