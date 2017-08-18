@@ -66,13 +66,13 @@ class PlayerPanel(BoxLayout):
 		
 	def onSongTitleText(self,instance, value):
 		self.titleFilter = value
-		songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
-		self.populateSongList(songs)
+		self.songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
+		self.populateSongList(self.songs)
 		
 	def onBandNameText(self,instance, value):
 		self.bandFilter = value
-		songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
-		self.populateSongList(songs)
+		self.songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
+		self.populateSongList(self.songs)
 		
 	def populateSongList(self,songs):
 		self.songListGrid.clear_widgets()
@@ -107,8 +107,8 @@ class PlayerPanel(BoxLayout):
 			self.selectedGenre = args[0].selection[0].text
 		else:
 			self.selectedGenre = ""
-		songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
-		self.populateSongList(songs)
+		self.songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
+		self.populateSongList(self.songs)
 
 	def songSelectionChanged(self, button):
 		global song
@@ -183,10 +183,10 @@ class PlayerPanel(BoxLayout):
 			songList = self.library.lookupTable[self.selectedGenre]
 		else:
 			songList = [song for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs]]
-		songs = sorted(songList)
+		self.songs = sorted(songList)
 		self.songListGrid = GridLayout(cols=3, size_hint_y=None)
 		self.songListGrid.bind(minimum_height=self.songListGrid.setter('height'))
-		self.populateSongList(songs)
+		self.populateSongList(self.songs)
 		self.songListView = ScrollView()
 		dataPanel.add_widget(self.songListView)
 		self.songListView.add_widget(self.songListGrid)
@@ -219,16 +219,23 @@ class PlayerPanel(BoxLayout):
 		self.p.set_time(self.p.get_time()+1000)
 		
 	def playPrevious(self):
-		if self.songList._count>0:
-			selectedSongIndex = (self.selectedSongIndex-1) % self.songList._count
-		#song = self.songListAdapter.get_view(selectedSongIndex)
-		#self.songListAdapter.handle_selection(song)
+		global song
+		if len(self.songs)>0:
+			self.selectedSongIndex = (self.selectedSongIndex-1) % len(self.songs)
+		song = self.songs[self.selectedSongIndex]
+		self.timeSlider.max=song.length
+		self.newSong = True
+		self.startSong()
 
 	def playNext(self):
-		if self.songList._count>0:
-			selectedSongIndex = (self.selectedSongIndex+1) % self.songList._count
-		#song = self.songListAdapter.get_view(selectedSongIndex)
-		#self.songListAdapter.handle_selection(song)
+		#print ("Playing next of "+str(len(self.songs))+" songs")
+		global song
+		if len(self.songs)>0:
+			self.selectedSongIndex = (self.selectedSongIndex+1) % len(self.songs)
+		song = self.songs[self.selectedSongIndex]
+		self.timeSlider.max=song.length
+		self.newSong = True
+		self.startSong()
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 			if keycode[1] == 'spacebar':
@@ -246,8 +253,9 @@ class PlayerPanel(BoxLayout):
 			return True
 
 	def songEndReachedCallback(self,ev):
-		self.playNext()
+		self.p = None
 		self.allowSetTime = False
+		self.playNext()
 
 	def playSong(self):
 		self.p = vlc.MediaPlayer(song.url)
