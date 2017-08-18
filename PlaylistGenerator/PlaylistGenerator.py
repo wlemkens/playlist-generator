@@ -43,7 +43,10 @@ class PlaylistGenerator(object):
 				genre = item[1]
 				if genre in self.library.lookupTable:
 					nbOfSongs = len(self.library.lookupTable[genre])
-					index = random.randint(0,nbOfSongs-1)
+					if nbOfSongs>1:
+						index = random.randint(0,nbOfSongs-1)
+					else:
+						index = 0
 					song = self.library.lookupTable[genre][index]
 					self.library.lookupTable[genre] = self.library.lookupTable[genre][:index]+self.library.lookupTable[genre][index+1:]
 					return song
