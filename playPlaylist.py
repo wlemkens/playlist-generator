@@ -356,7 +356,7 @@ class PlaylistPlayer(App):
 	def build(self):
 		self.newSong = False
 		self.panel = PlayerPanel(orientation='vertical')
-		#Window.fullscreen = 'auto'
+		Window.fullscreen = 'auto'
 		return self.panel
 
 
