@@ -31,6 +31,7 @@ import threading
 import vlc
 
 from PlaylistGenerator.MusicLibrary import MusicLibrary
+from Gui.TimeSlider import TimeSlider
 
 
 
@@ -47,7 +48,8 @@ else:
 
 class PlayerPanel(BoxLayout):
 	def updatePanels(self,dt):
-		pass
+		if self.p:
+			self.timeSlider.value = self.p.get_time()/1000
 		
 	#def updateDancePanel(self):
 		#global song
@@ -124,6 +126,8 @@ class PlayerPanel(BoxLayout):
 						song = testSong
 						break
 		self.newSong = True
+		self.timeSlider.max = song.length
+		self.timeSlider.value=0
 		self.startSong()
 
 	def __init__(self, **kwargs):
@@ -139,11 +143,15 @@ class PlayerPanel(BoxLayout):
 		self.p = None
 		self.library = MusicLibrary(musicPath)
 		self.selectedSongIndex=0
-		
+		self.allowSetTime = False
+		self.orientation = "vertical"
+
+		mainPanel = BoxLayout()
+		self.add_widget(mainPanel)
 		controlPanel = BoxLayout(orientation='vertical',size_hint=(.3,1))
-		self.add_widget(controlPanel)
+		mainPanel.add_widget(controlPanel)
 		dataPanel = BoxLayout(orientation='vertical',size_hint=(.7,1))
-		self.add_widget(dataPanel)
+		mainPanel.add_widget(dataPanel)
 		filterPanel = BoxLayout()
 		filterPanel.size=(300,30)
 		filterPanel.size_hint=(1,None)
@@ -182,9 +190,17 @@ class PlayerPanel(BoxLayout):
 		self.songListView = ScrollView()
 		dataPanel.add_widget(self.songListView)
 		self.songListView.add_widget(self.songListGrid)
+
+		self.timeSlider = TimeSlider(max=100,size=(30,60),size_hint=(1,None))
+		self.timeSlider.on_value=self.onSliderValueChange
+		self.add_widget(self.timeSlider)
 		
 		self.paused = True
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
+		
+	def onSliderValueChange(self,instance,value):
+		if self.allowSetTime:
+			self.p.set_time(int(value*1000))
 
 	def _keyboard_closed(self):
 			self._keyboard.unbind(on_key_down=self._on_keyboard_down)
@@ -230,13 +246,15 @@ class PlayerPanel(BoxLayout):
 			return True
 
 	def songEndReachedCallback(self,ev):
-		self.generateSong()
+		self.playNext()
+		self.allowSetTime = False
 
 	def playSong(self):
 		self.p = vlc.MediaPlayer(song.url)
 		pevent = self.p.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
 		self.p.play()
+		self.allowSetTime = True
 		
 		
 	def startSong(self):
