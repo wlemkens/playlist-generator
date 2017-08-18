@@ -116,7 +116,8 @@ class PlayerPanel(BoxLayout):
 		self.timeSlider.value = self.p.get_time()/1000
 		
 	def onSliderValueChange(self,instance,value):
-		self.p.set_time(int(value*1000))
+		if self.allowSetTime:
+			self.p.set_time(int(value*1000))
 
 	def updateTitlePanel(self):
 		self.titlePanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
@@ -297,6 +298,7 @@ class PlayerPanel(BoxLayout):
 	def songEndReachedCallback(self,ev):
 		self.generateSong()
 		self.state = 1
+		self.allowSetTime = False
 
 	def delayAnnouncement(self,dt):
 		self.state += 1
@@ -322,6 +324,7 @@ class PlayerPanel(BoxLayout):
 		pevent = self.p.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
 		self.p.play()
+		self.allowSetTime = True
 		
 		
 	def songStatusCallback(self,dt):
