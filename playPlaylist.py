@@ -114,6 +114,9 @@ class PlayerPanel(BoxLayout):
 		global song
 		self.timeSlider.font_size = (int)(np.min([self.size[1]/2.0,self.size[0]/60.0]))
 		self.timeSlider.value = self.p.get_time()/1000
+		
+	def onSliderValueChange(self,instance,value):
+		self.p.set_time(int(value*1000))
 
 	def updateTitlePanel(self):
 		self.titlePanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
@@ -219,6 +222,7 @@ class PlayerPanel(BoxLayout):
 		self.add_widget(self.bandPanel)
 		
 		self.timeSlider = TimeSlider(max=100)
+		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
 		self.paused = False
 		t = threading.Thread(target=self.generateSong)
