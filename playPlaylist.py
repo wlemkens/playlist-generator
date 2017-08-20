@@ -117,7 +117,8 @@ class PlayerPanel(BoxLayout):
 		
 	def onSliderValueChange(self,instance,value):
 		if self.allowSetTime:
-			self.p.set_time(int(value*1000))
+			if self.p:
+				self.p.set_time(int(value*1000))
 
 	def updateTitlePanel(self):
 		self.titlePanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
@@ -288,6 +289,7 @@ class PlayerPanel(BoxLayout):
 			return True
 
 	def generateSong(self):
+		#print ("Generating song")
 		global song
 		song = self.playlistGenerator.generateUniqueSong()
 		self.songIndex += 1
@@ -296,6 +298,8 @@ class PlayerPanel(BoxLayout):
 		self.timeSlider.value=0
 	
 	def songEndReachedCallback(self,ev):
+		#print ("End reached")
+		self.p = None
 		self.generateSong()
 		self.state = 1
 		self.allowSetTime = False
@@ -307,6 +311,7 @@ class PlayerPanel(BoxLayout):
 		self.state += 1
 		
 	def playAnnouncement(self,genre):
+		#print ("Playing announcement")
 		global genrePath
 		genreFile = genrePath+"/"+genre+".mp3"
 		if self.p:
@@ -318,6 +323,7 @@ class PlayerPanel(BoxLayout):
 		
 		
 	def playSong(self):
+		#print ("Playing song")
 		if self.p:
 			self.p.stop()
 		self.p = vlc.MediaPlayer(song.url)
