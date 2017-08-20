@@ -77,11 +77,16 @@ class PlayerPanel(BoxLayout):
 	def populateSongList(self,songs):
 		self.songListGrid.clear_widgets()
 		index = 0
+		lastBtn = None
 		for song in songs:
 			songBtn = ToggleButton(text=song.title, size_hint_y=None, height=25,group='song')
 			songBtn.bind(on_release=self.songSelectionChanged)
 			songBtn.item=song
 			songBtn.index = index
+			songBtn.previousBtn = lastBtn
+			if lastBtn:
+				lastBtn.nextBtn = songBtn
+			lastBtn = songBtn
 			index+=1
 			bandLbl = Label(text=song.band,size_hint_x=0.4, width=150)
 			durationLbl = Label(text=song.duration(),size_hint_x=None, width=70)
@@ -112,17 +117,17 @@ class PlayerPanel(BoxLayout):
 
 	def songSelectionChanged(self, button):
 		global song
-		self.selectedSong = button.item.title
+		self.selectedSong = button
 		self.selectedSongIndex = button.index
 		if (self.selectedGenre):
 			for testSong in self.library.lookupTable[self.selectedGenre]:
-				if testSong.title == self.selectedSong:
+				if testSong.title == self.selectedSong.item.title:
 					song = testSong
 					break
 		else:
 			for key,value in self.library.lookupTable.items():
 				for testSong in value:
-					if testSong.title == self.selectedSong:
+					if testSong.title == self.selectedSong.item.title:
 						song = testSong
 						break
 		self.newSong = True
@@ -219,23 +224,12 @@ class PlayerPanel(BoxLayout):
 		self.p.set_time(self.p.get_time()+1000)
 		
 	def playPrevious(self):
-		global song
-		if len(self.songs)>0:
-			self.selectedSongIndex = (self.selectedSongIndex-1) % len(self.songs)
-		song = self.songs[self.selectedSongIndex]
-		self.timeSlider.max=song.length
-		self.newSong = True
-		self.startSong()
+		self.selectedSong = self.selectedSong.previousBtn
+		self.selectedSong.trigger_action()
 
 	def playNext(self):
-		#print ("Playing next of "+str(len(self.songs))+" songs")
-		global song
-		if len(self.songs)>0:
-			self.selectedSongIndex = (self.selectedSongIndex+1) % len(self.songs)
-		song = self.songs[self.selectedSongIndex]
-		self.timeSlider.max=song.length
-		self.newSong = True
-		self.startSong()
+		self.selectedSong = self.selectedSong.nextBtn
+		self.selectedSong.trigger_action()
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 			if keycode[1] == 'spacebar':
