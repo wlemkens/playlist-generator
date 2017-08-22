@@ -1,7 +1,25 @@
 # playlist-generator
 A tool to create ball folk playlist from tagged mp3/flac music
 
-# Install
+# Install Windows
+(Not yet working)
+
+## Prerequisites
+Install Python
+
+### Kivi
+Based on https://kivy.org/docs/installation/installation-windows.html#install-win-dist
+
+On a commandline:
+```
+python -m pip install --upgrade pip wheel setuptools
+python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew
+python -m pip install kivy
+```
+### VLC
+Get it at https://www.videolan.org/vlc/download-windows.html
+
+# Install Ubuntu 16.04
 Install instructions for Ubuntu 16.04. 
 These instructions are not tested on any other platform.
 There should be no OS dependend prerequisites however, so if you managed to install it on an other platform, feel free to add the info.
