@@ -231,6 +231,7 @@ class PlayerPanel(BoxLayout):
 		t.start()
 		event = Clock.schedule_interval(self.songStatusCallback, 1 / 30.)
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
+		self.fullscreen = True
 
 	def _keyboard_closed(self):
 			self._keyboard.unbind(on_key_down=self._on_keyboard_down)
@@ -286,6 +287,13 @@ class PlayerPanel(BoxLayout):
 					self.forward()
 				else:
 					self.playNext()
+			elif keycode[1] == 'f':
+				if self.fullscreen:
+					Window.fullscreen = False
+					self.fullscreen = False
+				else:
+					Window.fullscreen = "auto"
+					self.fullscreen = True
 			return True
 
 	def generateSong(self):
