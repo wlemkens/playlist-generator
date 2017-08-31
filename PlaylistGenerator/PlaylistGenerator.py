@@ -47,7 +47,10 @@ class PlaylistGenerator(object):
 						index = random.randint(0,nbOfSongs-1)
 					else:
 						index = 0
-					song = self.library.lookupTable[genre][index]
+					try:
+						song = self.library.lookupTable[genre][index]
+					except (Exception):
+						print ("Error loading song :d for genre ':s'".format(index,genre))
 					self.library.lookupTable[genre] = self.library.lookupTable[genre][:index]+self.library.lookupTable[genre][index+1:]
 					return song
 				else:
