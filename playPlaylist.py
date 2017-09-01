@@ -36,6 +36,7 @@ import time
 from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 from Tools import DirectoryTools
 from Gui.TimeSlider import TimeSlider
+from Player.AudioPlayer import AudioPlayer
 
 metricsFile = ""
 musicPath = ""
@@ -113,12 +114,11 @@ class PlayerPanel(BoxLayout):
 	def updateSliderPanel(self):
 		global song
 		self.timeSlider.font_size = (int)(np.min([self.size[1]/2.0,self.size[0]/60.0]))
-		self.timeSlider.value = self.p.get_time()/1000
+		self.timeSlider.value = self.player.getTime()
 		
 	def onSliderValueChange(self,instance,value):
-		if self.allowSetTime:
-			if self.p:
-				self.p.set_time(int(value*1000))
+		if self.player:
+			self.player.setTime(value)
 
 	def updateTitlePanel(self):
 		self.titlePanel.font_size = (int)(np.min([self.size[1]/4.0,self.size[0]/40.0]))
@@ -136,7 +136,9 @@ class PlayerPanel(BoxLayout):
 
 	def onCheckboxActive(self,checkbox,value):
 		global enableAnnoucements
-		enableAnnoucements = value
+		if enableAnnoucements != value:
+			self.player.setPlayAnnouncements(value)
+			enableAnnoucements = value
 		
 	def dismiss_popup(self):
 		self._popup.dismiss()
@@ -151,6 +153,7 @@ class PlayerPanel(BoxLayout):
 	def loadAnnouncementPath(self, path, filename):
 		global genrePath
 		genrePath = path
+		self.player.setAnnouncementDirectory(path)
 		self.dismiss_popup()
 
 	def loadMetricsFile(self, path, filename):
@@ -189,6 +192,7 @@ class PlayerPanel(BoxLayout):
 		global delay
 		if self.announcementDelayInput.text:
 			delay = float(self.announcementDelayInput.text)
+			self.player.setAnnouncementDelay(delay)
 	
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
@@ -222,7 +226,10 @@ class PlayerPanel(BoxLayout):
 		self.add_widget(self.titlePanel)
 		self.bandPanel = Label(text="Test")
 		self.add_widget(self.bandPanel)
-		
+
+	
+		self.player = AudioPlayer(enableAnnoucements, genrePath, delay)
+		self.player.endReachedCallback = self.songEndReachedCallback
 		self.timeSlider = TimeSlider(max=100)
 		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
@@ -238,39 +245,28 @@ class PlayerPanel(BoxLayout):
 			self._keyboard = None
 
 	def pause(self):
-		if self.paused:
-			if self.state==5:
-				self.announcementPauseStart+= time.time() - self.pauseStart
-			if self.state in [3,6,9]:
-				self.p.play()
-			self.paused = False
-		else:
-			self.pauseStart = time.time()
-			if self.state in [3,6,9]:
-				self.p.pause()
-			self.paused = True
+		self.player.togglePause()
+
 	def backward(self):
-		self.p.set_time(self.p.get_time()-1000)
+		self.player.setTime(self.player.getTime()-1)
 	def forward(self):
-		self.p.set_time(self.p.get_time()+1000)
+		self.player.setTime(self.player.getTime()+1)
 		
 	def playPrevious(self):
 		global song
 		if self.songIndex>0:
 			self.songIndex -= 1
 			song = self.playlistGenerator.songList[self.songIndex]
-			self.newSong = True
-		self.state = 1
+			self.player.loadAndPlay(song)
 			
 	def playNext(self):
 		global song
 		if self.songIndex<len(self.playlistGenerator.songList)-1:
 			self.songIndex += 1
 			song = self.playlistGenerator.songList[self.songIndex]
-			self.newSong = True
+			self.player.loadAndPlay(song)
 		else:
 			self.generateSong()
-		self.state = 1
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 			if keycode[1] == 'escape':
@@ -297,78 +293,26 @@ class PlayerPanel(BoxLayout):
 			return True
 
 	def generateSong(self):
-		#print ("Generating song")
+		print ("Generating song")
 		global song
 		song = self.playlistGenerator.generateUniqueSong()
 		self.songIndex += 1
-		self.state = 1
 		self.timeSlider.max = song.length
 		self.timeSlider.value=0
+		self.player.loadSong(song)
+		self.player.play()
 	
-	def songEndReachedCallback(self,ev):
-		#print ("End reached")
-		self.p = None
+	def songEndReachedCallback(self):
+		print ("End")
 		self.generateSong()
-		self.state = 1
-		self.allowSetTime = False
 
-	def delayAnnouncement(self,dt):
-		self.state += 1
-		
-	def announcementEndReachedCallback(self,ev):
-		self.state += 1
-		
-	def playAnnouncement(self,genre):
-		#print ("Playing announcement")
-		global genrePath
-		genreFile = genrePath+"/"+genre+".mp3"
-		if self.p:
-			self.p.stop()
-		self.p = vlc.MediaPlayer(genreFile)
-		pevent = self.p.event_manager()
-		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.announcementEndReachedCallback)
-		self.p.play()
-		
-		
-	def playSong(self):
-		#print ("Playing song")
-		if self.p:
-			self.p.stop()
-		self.p = vlc.MediaPlayer(song.url)
-		pevent = self.p.event_manager()
-		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
-		self.p.play()
-		self.allowSetTime = True
-		
 		
 	def songStatusCallback(self,dt):
-		global enableAnnoucements,delay
-		if not self.paused:
-			if self.state==1:
-				if enableAnnoucements:
-					self.state=2
-				else:
-					self.state=8
-			if self.state==2:
-				self.state+=1
-				self.playAnnouncement(song.genre)
-			if self.state==4:
-				self.state+=1
-				self.announcementPauseStart = time.time()
-			if self.state==5:
-				if time.time() - self.announcementPauseStart >= delay:
-					self.state+=1
-			if self.state==6:
-				self.state+=1
-				self.playAnnouncement(song.genre)
-			if self.state==8:
-				self.state+=1
-				self.playSong()
+		pass
 
 class PlaylistPlayer(App):
 		
 	def build(self):
-		self.newSong = False
 		self.panel = PlayerPanel(orientation='vertical')
 		Window.fullscreen = 'auto'
 		return self.panel
