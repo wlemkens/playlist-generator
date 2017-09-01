@@ -32,6 +32,7 @@ import vlc
 
 from PlaylistGenerator.MusicLibrary import MusicLibrary
 from Gui.TimeSlider import TimeSlider
+from Player.AudioPlayer import AudioPlayer
 
 
 
@@ -48,8 +49,8 @@ else:
 
 class PlayerPanel(BoxLayout):
 	def updatePanels(self,dt):
-		if self.p:
-			self.timeSlider.value = self.p.get_time()/1000
+		if self._player:
+			self.timeSlider.value = self._player.getTime()
 		
 	#def updateDancePanel(self):
 		#global song
@@ -145,7 +146,6 @@ class PlayerPanel(BoxLayout):
 		self.selectedGenre=""
 		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
-		self.p = None
 		self.library = MusicLibrary(musicPath)
 		self.selectedSongIndex=0
 		self.allowSetTime = False
@@ -196,32 +196,29 @@ class PlayerPanel(BoxLayout):
 		dataPanel.add_widget(self.songListView)
 		self.songListView.add_widget(self.songListGrid)
 
+		self._player = AudioPlayer()
+		self._player.endReachedCallback = self.songEndReachedCallback
 		self.timeSlider = TimeSlider(max=100,size=(30,60),size_hint=(1,None))
 		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
 		
-		self.paused = True
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
 		
 	def onSliderValueChange(self,instance,value):
-		if self.allowSetTime:
-			self.p.set_time(int(value*1000))
+		self._player.setTime(value)
 
 	def _keyboard_closed(self):
 			self._keyboard.unbind(on_key_down=self._on_keyboard_down)
 			self._keyboard = None
 
 	def pause(self):
-		if self.paused:
-			self.p.play()
-			self.paused = False
-		else:
-			self.p.pause()
-			self.paused = True
+		self._player.togglePause()
+			
 	def backward(self):
-		self.p.set_time(self.p.get_time()-1000)
+		self._player.setTime(self._player.getTime()-1)
+		
 	def forward(self):
-		self.p.set_time(self.p.get_time()+1000)
+		self._player.set_time(self._player.getTime()+1)
 		
 	def playPrevious(self):
 		self.selectedSong = self.selectedSong.previousBtn
@@ -247,30 +244,18 @@ class PlayerPanel(BoxLayout):
 			return True
 
 	def songEndReachedCallback(self,ev):
-		self.p = None
-		self.allowSetTime = False
 		self.playNext()
 
 	def playSong(self):
-		self.p = vlc.MediaPlayer(song.url)
-		pevent = self.p.event_manager()
-		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
-		self.p.play()
-		self.allowSetTime = True
+		self._player.loadAndPlay(song)
 		
 		
 	def startSong(self):
-		if self.newSong:
-			if self.p:
-				self.p.stop()
-			self.newSong = False
-			self.paused = False
-			self.playSong()
+		self.playSong()
 
 class PlaylistPlayer(App):
 		
 	def build(self):
-		self.newSong = False
 		self.panel = PlayerPanel()
 		#Window.fullscreen = 'auto'
 		return self.panel
