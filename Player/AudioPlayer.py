@@ -57,11 +57,11 @@ class AudioPlayer(object):
 		else:
 			return song
 	
-	def loadAndPlay(self,track):
-		self.loadSong(track)
+	def loadAndPlay(self,track,speed=1.0):
+		self.loadSong(track,speed)
 		self.play()
 	
-	def loadSong(self,track):
+	def loadSong(self,track,speed=1.0):
 		self.cleanPlayer()
 			
 		self._tmpFile = NamedTemporaryFile("w+b", suffix=".wav")
@@ -69,7 +69,7 @@ class AudioPlayer(object):
 		announcement = None
 		if self._playAnnouncement:
 			announcement = AudioSegment.from_file(self.announcementDirectory+"/"+track.genre+".mp3", "mp3")
-		audio = self.processSong(song,announcement,self._playAnnouncement,self._announcementDelay)
+		audio = self.processSong(song,announcement,self._playAnnouncement,self._announcementDelay,speed)
 		audio.export(self._tmpFile.name,format="wav")
 		self._player = vlc.MediaPlayer(self._tmpFile.name)
 		pevent = self._player.event_manager()

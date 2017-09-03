@@ -32,6 +32,7 @@ import vlc
 
 from PlaylistGenerator.MusicLibrary import MusicLibrary
 from Gui.TimeSlider import TimeSlider
+from Gui.Spinner import Spinner
 from Player.AudioPlayer import AudioPlayer
 
 
@@ -150,6 +151,7 @@ class PlayerPanel(BoxLayout):
 		self.selectedSongIndex=0
 		self.allowSetTime = False
 		self.orientation = "vertical"
+		self.speed = 1.0
 
 		mainPanel = BoxLayout()
 		self.add_widget(mainPanel)
@@ -198,11 +200,18 @@ class PlayerPanel(BoxLayout):
 
 		self._player = AudioPlayer()
 		self._player.endReachedCallback = self.songEndReachedCallback
+		
+		self.speedSpinner = Spinner(np.arange(0.5,2.1,0.1),5)
+		self.speedSpinner.indexChangeCallback = self.speedChangeCallback
+		self.add_widget(self.speedSpinner)
 		self.timeSlider = TimeSlider(max=100,size=(30,60),size_hint=(1,None))
 		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
 		
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
+		
+	def speedChangeCallback(self,speed):
+		self.speed = speed
 		
 	def onSliderValueChange(self,instance,value):
 		self._player.setTime(value)
@@ -247,7 +256,7 @@ class PlayerPanel(BoxLayout):
 		self.playNext()
 
 	def playSong(self):
-		self._player.loadAndPlay(song)
+		self._player.loadAndPlay(song,self.speed)
 		
 		
 	def startSong(self):
