@@ -46,7 +46,7 @@ if len(sys.argv)>3:
 	musicPath = sys.argv[1]
 	metricsFile = sys.argv[2]
 	enableAnnoucements = True
-	delay = 10.0
+	delay = 6.0
 	if len(sys.argv)>3:
 		if sys.argv[3]=="0":
 			enableAnnoucements = False
