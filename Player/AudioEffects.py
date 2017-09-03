@@ -8,6 +8,7 @@ from pylab import *
 from scipy.io import wavfile
 from pydub import AudioSegment
 from pydub.utils import make_chunks
+from pydub import effects
 
 from tempfile import NamedTemporaryFile
 
@@ -125,6 +126,5 @@ def slowDown(sound,speed):
 	out = recursiveMerge(chunks[::2],chunks[1::2],crossfade)
 	return out
 
-def speedUp(self,sound,speed):
-	print("Warning: Speedup not implemented")
-	return sound
+def speedUp(sound,speed):
+	return effects.speedup(sound,speed)

@@ -6,8 +6,11 @@ from tempfile import NamedTemporaryFile
 import vlc
 
 from pydub import AudioSegment
+from pydub.utils import make_chunks
+
 
 from Tools import DirectoryTools
+from Player import AudioEffects
 
 class AudioPlayer(object):
 	def __init__(self,playAnnouncement=False,announcementDirectory = ".", announcementDelay = 6.0):
@@ -43,7 +46,11 @@ class AudioPlayer(object):
 	def setAnnouncementDelay(self,announcementDelay):
 		self.announcementDelay = announcementDelay
 		
-	def processSong(self,song,announcement,playAnnouncement,announcementDelay):
+	def processSong(self,sound,announcement,playAnnouncement,announcementDelay,speed=1.0):
+		#if AudioEffects.testPerformance(sound)>1:
+			#song = AudioEffects.speedChange(sound,0.5)
+		#else:
+		song = AudioEffects.fallbackSpeedChange(sound,speed)
 		if playAnnouncement:
 			pause = AudioSegment.silent(duration=announcementDelay*1000)
 			return announcement+pause+announcement+song
@@ -98,3 +105,4 @@ class AudioPlayer(object):
 	def setTime(self,playTime):
 		if self._player:
 			self._player.set_time(int(playTime*1000))
+	
