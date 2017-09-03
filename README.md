@@ -13,7 +13,7 @@ Based on https://kivy.org/docs/installation/installation-windows.html#install-wi
 On a commandline:
 ```
 python -m pip install --upgrade pip wheel setuptools
-python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew
+python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew 
 python -m pip install kivy
 ```
 ### VLC
@@ -30,7 +30,7 @@ Taglib, Mutagen, PyDub and Kivy
 ```
 sudo apt install git
 sudo apt install python3-pip
-sudo apt install python3-taglib python3-mutagen ffmpeg python3-numpy libvlc-dev vlc
+sudo apt install python3-taglib python3-mutagen ffmpeg python3-numpy libvlc-dev vlc python3-scipy python3-matplotlib
 sudo pip3 install pydub
 sudo add-apt-repository ppa:kivy-team/kivy
 sudo apt-get update
