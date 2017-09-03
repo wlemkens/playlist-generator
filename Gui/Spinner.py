@@ -29,12 +29,18 @@ class Spinner(BoxLayout):
 		downBtn = Button(text="-",on_press=self.down,size=(height,height),size_hint=(None,None),halign="right")
 		#btnPanel = BoxLayout(size=(height/2,height),size_hint=(None,None),orientation="vertical")
 		self.presets = presets
-		self.label = Label(height=height,width=2*height,size_hint=(None,None),halign="center",valign="center")
+		placeholder1 = Label(height=height,size_hint=(0.5,None))
+		placeholder2 = Label(height=height,size_hint=(0.5,None))
+		self.label = Label(height=height,width=2*height,size_hint=(None,None),halign="center",valign="center",font_size=20)
+		self.add_widget(placeholder1)
 		self.add_widget(downBtn)
 		self.add_widget(self.label)
 		#self.add_widget(btnPanel)
 		self.add_widget(upBtn)
+		self.add_widget(placeholder2)
 		self.setIndex(index)
+		self.height=height
+		self.size_hint=(1,None)
 
 	def onIndexChange(self):
 		self.label.text = str(self.presets[self.index])
