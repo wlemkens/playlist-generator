@@ -133,7 +133,6 @@ class PlayerPanel(BoxLayout):
 						song = testSong
 						break
 		self.newSong = True
-		self.timeSlider.max = song.length
 		self.timeSlider.value=0
 		self.startSong()
 
@@ -257,6 +256,7 @@ class PlayerPanel(BoxLayout):
 
 	def playSong(self):
 		self._player.loadAndPlay(song,self.speed)
+		self.timeSlider.max = self._player.trackLength/1000.0
 		
 		
 	def startSong(self):
