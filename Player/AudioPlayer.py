@@ -20,6 +20,7 @@ class AudioPlayer(object):
 		self._playAnnouncement = playAnnouncement
 		self._announcementDelay = announcementDelay
 		self.announcementDirectory = announcementDirectory
+		self.trackLength = 0
 		
 	def play(self):
 		if (self._player):
