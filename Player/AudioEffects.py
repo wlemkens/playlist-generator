@@ -42,7 +42,58 @@ def speedChange(sound,speed=1.0):
 	else:
 		return speedChangeChannel(sound,speed)
 			
+def speedChangeChunk(chunk1,chunk2,phi,amp):
+	out = zeros(N, dtype=complex)
+
+	win = hanning(N)
+	spec1 =  fft(win*chunk1)
+	spec2 =  fft(win*chunk2)
+	# take their phase difference and integrate
+	phi += (angle(spec2) - angle(spec1))
+	# bring the phase back to between pi and -pi
+	for i in phi:
+		while i > pi: i -= 2*pi
+		while i <= -pi: i += 2*pi
+	out.real, out.imag = cos(phi), sin(phi)
+	# inverse FFT and overlap-add
+	res = win*ifft(abs(spec2)*out)
+	return phi, res.real
+	
 def speedChangeChannel(sound,tscale):
+	tmpSrcFile = NamedTemporaryFile("w+b", suffix=".wav",delete=False)
+	sound.export(tmpSrcFile.name,format="wav")
+	tmpSrcFile.close()
+	
+	# read input and get the timescale factor
+	(sr,signalin) = wavfile.read(tmpSrcFile.name)
+	os.remove(tmpSrcFile.name)
+	L = len(signalin)
+	#for item in signalin:
+		#print (item)
+	# signal blocks for processing and output
+	sigout = zeros(int(L/tscale+N))
+	phi  = zeros(N)
+
+	# max input amp, window
+	#amp = max(signalin)
+	amp = max(signalin)
+	p = 0
+	pp = 0
+	while p < L-(N+H):
+		# take the spectra of two consecutive windows
+		p1 = int(p)
+		phi, res = speedChangeChunk(signalin[p1:p1+N],signalin[p1+H:p1+N+H],phi,amp)
+		sigout[pp:pp+N] += res
+		pp += H
+		p += H*tscale
+
+	#  write file to output, scaling it to original amp
+	with NamedTemporaryFile("w+b", suffix=".wav",delete=False) as tmpModFile:
+		wavfile.write(tmpModFile.name,sr,array(amp*sigout/max(sigout), dtype='int16'))
+		newSound = AudioSegment.from_file(tmpModFile.name, "wav")
+	return newSound
+	
+def speedChangeChannel1(sound,tscale):
 	tmpSrcFile = NamedTemporaryFile("w+b", suffix=".wav",delete=False)
 	sound.export(tmpSrcFile.name,format="wav")
 	tmpSrcFile.close()

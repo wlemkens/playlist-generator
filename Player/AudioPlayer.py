@@ -48,10 +48,12 @@ class AudioPlayer(object):
 		self.announcementDelay = announcementDelay
 		
 	def processSong(self,sound,announcement,playAnnouncement,announcementDelay,speed=1.0):
-		#if AudioEffects.testPerformance(sound)>1:
-			#song = AudioEffects.speedChange(sound,0.5)
-		#else:
-		song = AudioEffects.fallbackSpeedChange(sound,speed)
+		if AudioEffects.testPerformance(sound)>1:
+			print("Using standard speed change")
+			song = AudioEffects.speedChange(sound,speed)
+		else:
+			print("Using fallback speed change")
+			song = AudioEffects.fallbackSpeedChange(sound,speed)
 		if playAnnouncement:
 			pause = AudioSegment.silent(duration=announcementDelay*1000)
 			return announcement+pause+announcement+song
