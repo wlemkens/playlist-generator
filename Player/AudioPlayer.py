@@ -8,6 +8,8 @@ import vlc
 from pydub import AudioSegment
 from pydub.utils import make_chunks
 
+import numpy as np
+
 
 from Tools import DirectoryTools
 from Player import AudioEffects
@@ -21,6 +23,7 @@ class AudioPlayer(object):
 		self._announcementDelay = announcementDelay
 		self.announcementDirectory = announcementDirectory
 		self.trackLength = 0
+		self.songBuffer = []
 		
 	def play(self):
 		if (self._player):
@@ -56,9 +59,11 @@ class AudioPlayer(object):
 			song = AudioEffects.fallbackSpeedChange(sound,speed)
 		if playAnnouncement:
 			pause = AudioSegment.silent(duration=announcementDelay*1000)
-			return announcement+pause+announcement+song
+			total = announcement+pause+announcement+song
 		else:
-			return song
+			total = song
+		self.songBuffer = make_chunks(total,1000)
+		return total
 	
 	def loadAndPlay(self,track,speed=1.0):
 		self.loadSong(track,speed)
@@ -73,7 +78,8 @@ class AudioPlayer(object):
 		if self._playAnnouncement:
 			announcement = AudioSegment.from_file(self.announcementDirectory+"/"+track.genre+".mp3", "mp3")
 		audio = self.processSong(song,announcement,self._playAnnouncement,self._announcementDelay,speed)
-		audio.export(self._tmpFile.name,format="wav")
+		self.songBuffer[0].export(self._tmpFile.name,format="wav")
+		self.chunkIndex = 0
 		self._player = vlc.MediaPlayer(self._tmpFile.name)
 		pevent = self._player.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
@@ -84,8 +90,16 @@ class AudioPlayer(object):
 		pass
 	
 	def songEndReachedCallback(self,ev):
-		self.cleanPlayer()
-		self.endReachedCallback()
+		self.chunkIndex +=1
+		if self.chunkIndex>len(self.songBuffer):
+			self.cleanPlayer()
+			self.endReachedCallback()
+		else:
+			self.songBuffer[self.chunkIndex].export(self._tmpFile.name,format="wav")
+			self._player = vlc.MediaPlayer(self._tmpFile.name)
+			pevent = self._player.event_manager()
+			pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
+			self.play()
 	
 	def cleanPlayer(self):
 		if self._player:
