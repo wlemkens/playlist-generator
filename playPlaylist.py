@@ -215,7 +215,7 @@ class PlayerPanel(BoxLayout):
 		self.announcementDelayInput = TextInput(text='', multiline=False,size=(100,30),size_hint=(None,None),input_filter='float',unfocus_on_touch=True)
 		self.announcementDelayInput.bind(text=self.onDelayText)
 		self.menuPanel.add_widget(self.announcementDelayInput)
-		self.announcementChkLbl = Label(text="Enable announcements",halign="right",valign="center")
+		self.announcementChkLbl = Label(text="Enable announcements",width=100,halign="right",valign="center")
 		self.menuPanel.add_widget(self.announcementChkLbl)
 		self.enableAnnoucementsChk = CheckBox(size=(30,30),size_hint=(None,None))
 		self.enableAnnoucementsChk.bind(active=self.onCheckboxActive)
