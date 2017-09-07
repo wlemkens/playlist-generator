@@ -52,13 +52,6 @@ else:
 	sys.exit(0)
 
 
-class StatusPanel(BoxLayout):
-	
-	def __init__(self, **kwargs):
-		super(StatusPanel, self).__init__(**kwargs)
-		self.statusText = Label(text="Loading library")
-		self.add_widget(self.statusText)
-		
 class PlayerPanel(BoxLayout):
 	def updatePanels(self,dt):
 		if self._player:
@@ -160,7 +153,7 @@ class PlayerPanel(BoxLayout):
 
 	def onSongFound(self,nbOfSongs,nbOfGenres):
 		if self._popup:
-			self._popup.content.statusText.text = "Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres)
+			self._popup.content.text = "Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres)
 			
 	def showPopup(self,ev):
 		self._popup.open()
@@ -245,8 +238,7 @@ class PlayerPanel(BoxLayout):
 		
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
 		
-		content = StatusPanel()
-		self._popup = Popup(title="Loading library", content=content,
+		self._popup = Popup(title="Loading library", content=Label(text="Loading library"),
 												size_hint=(0.8, 0.8))
 		event = Clock.schedule_once(self.showPopup)
 		
