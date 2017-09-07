@@ -145,7 +145,6 @@ class PlayerPanel(BoxLayout):
 
 	def onLibraryLoaded(self,nbOfSongs,nbOfGenres):
 		genres = self.getGenres()
-		self.genreListAdapter.data = genres
 		self.songs = self.getFilteredSongs()
 		self.populateSongList(self.songs)
 		self._popup.dismiss()
