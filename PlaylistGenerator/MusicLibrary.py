@@ -13,6 +13,7 @@ from mutagen.easyid3 import EasyID3
 import taglib
 from PlaylistGenerator.Track import Track
 from PlaylistGenerator.PlaylistMetrics import PlaylistMetrics
+from PlaylistGenerator.DB import DB
 from Tools import DirectoryTools
 import random
 
@@ -28,14 +29,26 @@ from pydub import AudioSegment
 
 class MusicLibrary(object):
 	def __init__(self,musicPath):
+		self._db = DB("music.db",musicPath)
 		self.musicPath = musicPath.rstrip('/')
 		self.lookupTable = {}
 		self.nbOfSongs = 0
 		self.blackList = ["balfolk","buikdans?","celtic","other","folk","folklore","trad."]
 		
+		self.loadLookupTable()
 		t = threading.Thread(target=self.generateLookupTable)
 		t.start()
 		
+	def loadLookupTable(self):
+		if self.musicPath in self._db.data:
+			for key,track in self._db.data[self.musicPath].items():
+				if track.genre in self.lookupTable:
+					self.lookupTable[track.genre]+=[track]
+				else:
+					self.lookupTable[track.genre]=[track]
+				self.nbOfSongs+=1
+				self.onSongFound(self.nbOfSongs,len(self.lookupTable))
+			
 	def generateLookupTable(self):
 		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
 		for f in fileList:
@@ -47,12 +60,17 @@ class MusicLibrary(object):
 			if danceType and length>0:
 				if not danceType in self.blackList:
 					track = Track(f,danceType,length,fileType,title,band)
-					if danceType in self.lookupTable:
-						self.lookupTable[danceType]+=[track]
-					else:
-						self.lookupTable[danceType]=[track]
-					self.nbOfSongs+=1
-					self.onSongFound(self.nbOfSongs,len(self.lookupTable))
+					if not self._db.contains(track):
+						bpm = self.getFileBpm(f)
+						track.bpm = bpm
+						self._db.addTrack(track)
+						if danceType in self.lookupTable:
+							self.lookupTable[danceType]+=[track]
+						else:
+							self.lookupTable[danceType]=[track]
+						self.nbOfSongs+=1
+						self.onSongFound(self.nbOfSongs,len(self.lookupTable))
+						self._db.save()
 		self.onLibraryLoaded(self.nbOfSongs,len(self.lookupTable))
 
 	def getAudioLength(self,filename):
