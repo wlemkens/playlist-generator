@@ -34,7 +34,7 @@ def testPerformance(sound):
 	return sampleSize/((endTime-startTime)*1000)
 	
 def speedChange(sound,speed=1.0):
-	if speed==1.0:
+	if abs(speed - 1.0) <= 0.01:
 		return sound
 	if sound.channels>1:
 		monoSound = sound.set_channels(1)
@@ -142,9 +142,9 @@ def speedChangeChannel1(sound,tscale):
 def fallbackSpeedChange(sound,speed=1.0):
 	if sound.channels>1:
 		sound = sound.set_channels(1)
-	if speed>1.0:
+	if speed>1.01:
 		return speedUp(sound,speed)
-	elif speed <1.0:
+	elif speed <1.01:
 		return slowDown(sound,speed)
 	else:
 		return sound
