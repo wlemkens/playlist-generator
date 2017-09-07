@@ -150,12 +150,13 @@ class PlayerPanel(BoxLayout):
 		self.timeSlider.value=0
 		self.startSong()
 
-	def onLibraryLoaded(self):
+	def onLibraryLoaded(self,nbOfSongs,nbOfGenres):
 		genres = self.getGenres()
 		self.genreListAdapter.data = genres
 		self.songs = self.getFilteredSongs()
 		self.populateSongList(self.songs)
 		self._popup.dismiss()
+		print ("Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres))
 
 	def onSongFound(self,nbOfSongs,nbOfGenres):
 		if self._popup:
