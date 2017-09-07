@@ -25,7 +25,7 @@ class MusicLibrary(object):
 		self.musicPath = musicPath.rstrip('/')
 		self.lookupTable = {}
 		self.nbOfSongs = 0
-		self.blackList = ["balfolk","buikdans?","celtic","other"]
+		self.blackList = ["balfolk","buikdans?","celtic","other","folk","folklore","trad."]
 		
 		t = threading.Thread(target=self.generateLookupTable)
 		t.start()
@@ -47,7 +47,7 @@ class MusicLibrary(object):
 						self.lookupTable[danceType]=[track]
 					self.nbOfSongs+=1
 					self.onSongFound(self.nbOfSongs,len(self.lookupTable))
-		self.onLibraryLoaded()
+		self.onLibraryLoaded(self.nbOfSongs,len(self.lookupTable))
 
 	def getAudioLength(self,filename):
 		if filename.split(".")[-1]=="mp3":
@@ -88,7 +88,7 @@ class MusicLibrary(object):
 			print("Not found any band tag for '"+filename+"'")
 		return None
 	
-	def onLibraryLoaded(self):
+	def onLibraryLoaded(self,nbOfSongs,nbOfGenres):
 		pass
 	
 	def onSongFound(self,nbOfSongs,nbOfGenres):
