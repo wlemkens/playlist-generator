@@ -3,13 +3,14 @@
 import numpy as np
 
 class Track(object):
-	def __init__(self,url,genre,length,fileType,title,band):
+	def __init__(self,url,genre,length,fileType,title,band,bpm=None):
 		self.url = url
 		self.genre = genre
 		self.length = length
 		self.fileType = fileType
 		self.title = title
 		self.band = band
+		self.bpm = bpm
 		if not self.title:
 			self.title = ""
 		if not self.band:
