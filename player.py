@@ -230,9 +230,6 @@ class PlayerPanel(BoxLayout):
 		self.songListView.add_widget(self.songListGrid)
 		self._player = AudioPlayer()
 		self._player.endReachedCallback = self.songEndReachedCallback
-		genres = self.getGenres()
-		self.songs = self.getFilteredSongs()
-		self.populateSongList(self.songs)
 
 		speedBox = BoxLayout(size=(300,30),size_hint=(1,None))
 		self.add_widget(speedBox)
@@ -255,7 +252,12 @@ class PlayerPanel(BoxLayout):
 		
 		self._popup = Popup(title="Loading library", content=Label(text="Loading library"),
 												size_hint=(0.8, 0.8))
-		event = Clock.schedule_once(self.showPopup)
+		#event = Clock.schedule_once(self.showPopup)
+		genres = self.getGenres()
+		self.songs = self.getFilteredSongs()
+		self.populateSongList(self.songs)
+		#if self._popup:
+			#self._popup.dismiss()
 		
 	def speedChangeCallback(self,speed):
 		self.speed = speed
