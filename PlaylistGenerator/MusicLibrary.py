@@ -16,13 +16,19 @@ from PlaylistGenerator.PlaylistMetrics import PlaylistMetrics
 from Tools import DirectoryTools
 import random
 
+import threading
+
 # custom imports
 
 class MusicLibrary(object):
 	def __init__(self,musicPath):
 		self.musicPath = musicPath.rstrip('/')
 		self.lookupTable = {}
-		self.generateLookupTable()
+		self.nbOfSongs = 0
+		self.blackList = ["balfolk","buikdans?","celtic","other"]
+		
+		t = threading.Thread(target=self.generateLookupTable)
+		t.start()
 		
 	def generateLookupTable(self):
 		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
@@ -33,11 +39,15 @@ class MusicLibrary(object):
 			title = self.getTitle(f)
 			band = self.getBand(f)
 			if danceType and length>0:
-				track = Track(f,danceType,length,fileType,title,band)
-				if danceType in self.lookupTable:
-					self.lookupTable[danceType]+=[track]
-				else:
-					self.lookupTable[danceType]=[track]
+				if not danceType in self.blackList:
+					track = Track(f,danceType,length,fileType,title,band)
+					if danceType in self.lookupTable:
+						self.lookupTable[danceType]+=[track]
+					else:
+						self.lookupTable[danceType]=[track]
+					self.nbOfSongs+=1
+					self.onSongFound(self.nbOfSongs,len(self.lookupTable))
+		self.onLibraryLoaded()
 
 	def getAudioLength(self,filename):
 		if filename.split(".")[-1]=="mp3":
@@ -77,3 +87,9 @@ class MusicLibrary(object):
 		except (KeyError):
 			print("Not found any band tag for '"+filename+"'")
 		return None
+	
+	def onLibraryLoaded(self):
+		pass
+	
+	def onSongFound(self,nbOfSongs,nbOfGenres):
+		pass

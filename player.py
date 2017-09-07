@@ -26,6 +26,8 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.checkbox import CheckBox
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.popup import Popup
 
 import numpy as np
 import sys
@@ -50,6 +52,13 @@ else:
 	sys.exit(0)
 
 
+class StatusPanel(BoxLayout):
+	
+	def __init__(self, **kwargs):
+		super(StatusPanel, self).__init__(**kwargs)
+		self.statusText = Label(text="Loading library")
+		self.add_widget(self.statusText)
+		
 class PlayerPanel(BoxLayout):
 	def updatePanels(self,dt):
 		if self._player:
@@ -99,11 +108,11 @@ class PlayerPanel(BoxLayout):
 			self.songListGrid.add_widget(durationLbl)
 		
 		
-	def getGenres(self,filterString):
+	def getGenres(self,filterString=""):
 		genres = sorted(genre for genre in list(self.library.lookupTable) if filterString in genre)
 		return genres
 		
-	def getFilteredSongs(self,nameFilterString,bandFilterString):
+	def getFilteredSongs(self,nameFilterString="",bandFilterString=""):
 		if self.selectedGenre in self.library.lookupTable:
 			songList = [song for song in self.library.lookupTable[self.selectedGenre] if nameFilterString in song.title and bandFilterString in song.band]
 		else:
@@ -141,6 +150,21 @@ class PlayerPanel(BoxLayout):
 		self.timeSlider.value=0
 		self.startSong()
 
+	def onLibraryLoaded(self):
+		genres = self.getGenres()
+		self.genreListAdapter.data = genres
+		self.songs = self.getFilteredSongs()
+		self.populateSongList(self.songs)
+		self._popup.dismiss()
+
+	def onSongFound(self,nbOfSongs,nbOfGenres):
+		if self._popup:
+			self._popup.content.statusText.text = "Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres)
+			
+	def showPopup(self,ev):
+		self._popup.open()
+
+		
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
 
@@ -152,10 +176,13 @@ class PlayerPanel(BoxLayout):
 		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
 		self.library = MusicLibrary(musicPath)
+		self.library.onLibraryLoaded = self.onLibraryLoaded
+		self.library.onSongFound = self.onSongFound
 		self.selectedSongIndex=0
 		self.allowSetTime = False
 		self.orientation = "vertical"
 		self.speed = 1.0
+		self._popup = None
 
 		mainPanel = BoxLayout()
 		self.add_widget(mainPanel)
@@ -189,15 +216,8 @@ class PlayerPanel(BoxLayout):
 		filterPanel.add_widget(placeholder)
 		
 		
-		songList = []
-		if self.selectedGenre in self.library.lookupTable:
-			songList = self.library.lookupTable[self.selectedGenre]
-		else:
-			songList = [song for songs in list(self.library.lookupTable) for song in self.library.lookupTable[songs]]
-		self.songs = sorted(songList)
 		self.songListGrid = GridLayout(cols=3, size_hint_y=None)
 		self.songListGrid.bind(minimum_height=self.songListGrid.setter('height'))
-		self.populateSongList(self.songs)
 		self.songListView = ScrollView()
 		dataPanel.add_widget(self.songListView)
 		self.songListView.add_widget(self.songListGrid)
@@ -223,6 +243,11 @@ class PlayerPanel(BoxLayout):
 		self.add_widget(self.timeSlider)
 		
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
+		
+		content = StatusPanel()
+		self._popup = Popup(title="Loading library", content=content,
+												size_hint=(0.8, 0.8))
+		event = Clock.schedule_once(self.showPopup)
 		
 	def speedChangeCallback(self,speed):
 		self.speed = speed
