@@ -30,8 +30,9 @@ Taglib, Mutagen, PyDub and Kivy
 ```
 sudo apt install git
 sudo apt install python3-pip
-sudo apt install python3-taglib python3-mutagen ffmpeg python3-numpy libvlc-dev vlc python3-scipy python3-matplotlib
+sudo apt install python3-taglib python3-mutagen ffmpeg python3-numpy libvlc-dev vlc python3-scipy python3-matplotlib aubio-tools libaubio-dev libaubio-doc
 sudo pip3 install pydub
+sudo pip3 install aubio
 sudo add-apt-repository ppa:kivy-team/kivy
 sudo apt-get update
 sudo apt-get install python3-kivy
