@@ -30,6 +30,7 @@ from pydub import AudioSegment
 class MusicLibrary(object):
 	def __init__(self,musicPath):
 		self._db = DB("music.db",musicPath)
+		self.running  = True
 		self.musicPath = musicPath.rstrip('/')
 		self.lookupTable = {}
 		self.nbOfSongs = 0
@@ -52,6 +53,8 @@ class MusicLibrary(object):
 	def generateLookupTable(self):
 		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
 		for f in fileList:
+			if not self.running:
+				break
 			danceType = DirectoryTools.getGenre(f)
 			length = self.getAudioLength(f)
 			fileType = DirectoryTools.getFileType(f)
@@ -176,3 +179,6 @@ class MusicLibrary(object):
 				return b
 		except Exception:
 			return 0
+		
+	def close(self):
+		self.running = False

@@ -197,7 +197,7 @@ class PlayerPanel(BoxLayout):
 	def onLibraryLoaded(self,nbOfSongs,nbOfGenres):
 		self._popup.dismiss()
 		print ("Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres))
-		self.generateSong()
+		#self.generateSong()
 
 	def onSongFound(self,nbOfSongs,nbOfGenres):
 		if self._popup:
@@ -208,6 +208,7 @@ class PlayerPanel(BoxLayout):
 
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
+
 		self._popup = None
 		self.state = 0
 		self.songIndex = -1
@@ -255,8 +256,9 @@ class PlayerPanel(BoxLayout):
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
 		self._popup = Popup(title="Loading library", content=Label(text="Loading library"),
 												size_hint=(0.8, 0.8))
-		event = Clock.schedule_once(self.showPopup)
+		#event = Clock.schedule_once(self.showPopup)
 		self.fullscreen = True
+		self.generateSong()
 
 	def _keyboard_closed(self):
 			self._keyboard.unbind(on_key_down=self._on_keyboard_down)
@@ -288,6 +290,7 @@ class PlayerPanel(BoxLayout):
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 			if keycode[1] == 'escape':
+				self.playlistGenerator.library.close()
 				sys.exit(0)
 			if keycode[1] == 'spacebar':
 				self.pause()
@@ -335,7 +338,8 @@ class PlaylistPlayer(App):
 		Window.fullscreen = 'auto'
 		return self.panel
 
-
+	def on_stop(self):
+		self.panel.playlistGenerator.library.close()
 		
 if __name__ == '__main__':
 	PlaylistPlayer().run()

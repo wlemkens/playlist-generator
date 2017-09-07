@@ -319,6 +319,8 @@ class PlaylistPlayer(App):
 		#Window.fullscreen = 'auto'
 		return self.panel
 
+	def on_stop(self):
+		self.panel.library.close()
 
 		
 if __name__ == '__main__':
