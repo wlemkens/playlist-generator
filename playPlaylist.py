@@ -194,14 +194,29 @@ class PlayerPanel(BoxLayout):
 			delay = float(self.announcementDelayInput.text)
 			self.player.setAnnouncementDelay(delay)
 	
+	def onLibraryLoaded(self,nbOfSongs,nbOfGenres):
+		self._popup.dismiss()
+		print ("Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres))
+		self.generateSong()
+
+	def onSongFound(self,nbOfSongs,nbOfGenres):
+		if self._popup:
+			self._popup.content.text = "Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres)
+			
+	def showPopup(self,ev):
+		self._popup.open()
+
 	def __init__(self, **kwargs):
 		super(PlayerPanel, self).__init__(**kwargs)
+		self._popup = None
 		self.state = 0
 		self.songIndex = -1
 		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
 		self.p = None
 		self.playlistGenerator = PlaylistGenerator(musicPath,metricsFile)
+		self.playlistGenerator.library.onLibraryLoaded = self.onLibraryLoaded
+		self.playlistGenerator.library.onSongFound = self.onSongFound
 		self.menuPanel = BoxLayout(height=30,size_hint=(1,None))
 		self.add_widget(self.menuPanel)
 		self.loadMusicBtn = Button(text="Load music",on_press=self.loadMusic)
@@ -234,10 +249,13 @@ class PlayerPanel(BoxLayout):
 		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
 		self.paused = False
-		t = threading.Thread(target=self.generateSong)
-		t.start()
+		#t = threading.Thread(target=self.generateSong)
+		#t.start()
 		event = Clock.schedule_interval(self.songStatusCallback, 1 / 30.)
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
+		self._popup = Popup(title="Loading library", content=Label(text="Loading library"),
+												size_hint=(0.8, 0.8))
+		event = Clock.schedule_once(self.showPopup)
 		self.fullscreen = True
 
 	def _keyboard_closed(self):
