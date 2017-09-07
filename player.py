@@ -46,7 +46,7 @@ musicPath = ""
 song = None
 genrePath = ""
 if len(sys.argv)>1:
-	musicPath = sys.argv[1]
+	musicPath = sys.argv[1].rstrip('/')
 else:
 	print ("Usage "+sys.argv[0]+" [path/to/music/]")
 	sys.exit(0)
@@ -81,6 +81,7 @@ class PlayerPanel(BoxLayout):
 		self.populateSongList(self.songs)
 		
 	def populateSongList(self,songs):
+		print ("populating")
 		self.songListGrid.clear_widgets()
 		index = 0
 		lastBtn = None
@@ -96,9 +97,22 @@ class PlayerPanel(BoxLayout):
 			index+=1
 			bandLbl = Label(text=song.band,size_hint_x=0.4, width=150)
 			durationLbl = Label(text=song.duration(),size_hint_x=None, width=70)
+			if song.bpm < 100:
+				spdTxt = "*"
+			elif song.bpm < 120:
+				spdTxt = "**"
+			elif song.bpm < 140:
+				spdTxt = "***"
+			elif song.bpm < 160:
+				spdTxt = "****"
+			else: 
+				spdTxt = "*****"				
+			speedLbl = Label(text=spdTxt,size_hint_x=0.4, width=40)
 			self.songListGrid.add_widget(songBtn)
 			self.songListGrid.add_widget(bandLbl)
 			self.songListGrid.add_widget(durationLbl)
+			self.songListGrid.add_widget(speedLbl)
+		print ("populating done")
 		
 		
 	def getGenres(self,filterString=""):
@@ -147,7 +161,8 @@ class PlayerPanel(BoxLayout):
 		genres = self.getGenres()
 		self.songs = self.getFilteredSongs()
 		self.populateSongList(self.songs)
-		self._popup.dismiss()
+		if self._popup:
+			self._popup.dismiss()
 		print ("Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres))
 
 	def onSongFound(self,nbOfSongs,nbOfGenres):
@@ -208,14 +223,16 @@ class PlayerPanel(BoxLayout):
 		filterPanel.add_widget(placeholder)
 		
 		
-		self.songListGrid = GridLayout(cols=3, size_hint_y=None)
+		self.songListGrid = GridLayout(cols=4, size_hint_y=None)
 		self.songListGrid.bind(minimum_height=self.songListGrid.setter('height'))
 		self.songListView = ScrollView()
 		dataPanel.add_widget(self.songListView)
 		self.songListView.add_widget(self.songListGrid)
-
 		self._player = AudioPlayer()
 		self._player.endReachedCallback = self.songEndReachedCallback
+		genres = self.getGenres()
+		self.songs = self.getFilteredSongs()
+		self.populateSongList(self.songs)
 
 		speedBox = BoxLayout(size=(300,30),size_hint=(1,None))
 		self.add_widget(speedBox)
