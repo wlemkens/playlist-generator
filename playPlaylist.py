@@ -43,7 +43,7 @@ musicPath = ""
 song = None
 genrePath = ""
 if len(sys.argv)>3:
-	musicPath = sys.argv[1]
+	musicPath = sys.argv[1].rstrip("/")
 	metricsFile = sys.argv[2]
 	enableAnnoucements = True
 	delay = 6.0
@@ -51,7 +51,7 @@ if len(sys.argv)>3:
 		if sys.argv[3]=="0":
 			enableAnnoucements = False
 	if len(sys.argv)>4 and enableAnnoucements:
-		genrePath = sys.argv[4]
+		genrePath = sys.argv[4].rstrip("/")
 	if len(sys.argv)>5:
 		delay = float(sys.argv[5])
 else:
