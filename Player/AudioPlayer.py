@@ -21,6 +21,7 @@ class AudioPlayer(object):
 		self._announcementDelay = announcementDelay
 		self.announcementDirectory = announcementDirectory
 		self.trackLength = 0
+		self._fastSpeedChange = True
 		
 	def play(self):
 		if (self._player):
@@ -48,12 +49,10 @@ class AudioPlayer(object):
 		self.announcementDelay = announcementDelay
 		
 	def processSong(self,sound,announcement,playAnnouncement,announcementDelay,speed=1.0):
-		if AudioEffects.testPerformance(sound)>1:
-			print("Using standard speed change")
-			song = AudioEffects.speedChange(sound,speed)
-		else:
-			print("Using fallback speed change")
+		if self._fastSpeedChange:
 			song = AudioEffects.fallbackSpeedChange(sound,speed)
+		else:
+			song = AudioEffects.speedChange(sound,speed)
 		if playAnnouncement:
 			pause = AudioSegment.silent(duration=announcementDelay*1000)
 			return announcement+pause+announcement+song
@@ -83,6 +82,9 @@ class AudioPlayer(object):
 	def endReachedCallback(self):
 		pass
 	
+	def setFastSpeedChange(self,value):
+		self._fastSpeedChange = value
+		
 	def songEndReachedCallback(self,ev):
 		self.cleanPlayer()
 		self.endReachedCallback()

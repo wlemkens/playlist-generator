@@ -25,6 +25,8 @@ from kivy.uix.listview import ListItemButton
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.togglebutton import ToggleButton
+from kivy.uix.checkbox import CheckBox
+
 import numpy as np
 import sys
 import threading
@@ -117,6 +119,9 @@ class PlayerPanel(BoxLayout):
 		self.songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
 		self.populateSongList(self.songs)
 
+	def onCheckboxActive(self,checkbox,value):
+		self._player.setFastSpeedChange(value)
+
 	def songSelectionChanged(self, button):
 		global song
 		self.selectedSong = button
@@ -199,10 +204,20 @@ class PlayerPanel(BoxLayout):
 
 		self._player = AudioPlayer()
 		self._player.endReachedCallback = self.songEndReachedCallback
-		
+
+		speedBox = BoxLayout(size=(300,30),size_hint=(1,None))
+		self.add_widget(speedBox)
 		self.speedSpinner = Spinner(np.arange(0.5,2.1,0.1),5)
 		self.speedSpinner.indexChangeCallback = self.speedChangeCallback
-		self.add_widget(self.speedSpinner)
+		speedBox.add_widget(self.speedSpinner)
+		speedChkBox = BoxLayout(size=(200,30),size_hint=(1,None))
+		speedBox.add_widget(speedChkBox)
+		speedChkLabel = Label(text="Fast speed change",halign="right")
+		speedChkBox.add_widget(speedChkLabel)
+		self.fastSpeedChangeChk = CheckBox(size=(30,30),size_hint=(None,None),active=True)
+		self.fastSpeedChangeChk.bind(active=self.onCheckboxActive)
+		speedChkBox.add_widget(self.fastSpeedChangeChk)
+		
 		self.timeSlider = TimeSlider(max=100,size=(30,60),size_hint=(1,None))
 		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
