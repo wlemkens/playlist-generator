@@ -36,8 +36,7 @@ class MusicLibrary(object):
 		self.nbOfSongs = 0
 		self.blackList = ["balfolk","buikdans?","celtic","other","folk","folklore","trad."]
 		
-		self.loadLookupTable()
-		t = threading.Thread(target=self.generateLookupTable)
+		t = threading.Thread(target=self.loadLookupTable)
 		t.start()
 		
 	def loadLookupTable(self):
@@ -49,6 +48,9 @@ class MusicLibrary(object):
 					self.lookupTable[track.genre]=[track]
 				self.nbOfSongs+=1
 				self.onSongFound(self.nbOfSongs,len(self.lookupTable))
+		self.onLibraryLoaded(self.nbOfSongs,len(self.lookupTable))
+		t = threading.Thread(target=self.generateLookupTable)
+		t.start()
 			
 	def generateLookupTable(self):
 		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
@@ -74,7 +76,6 @@ class MusicLibrary(object):
 						self.nbOfSongs+=1
 						self.onSongFound(self.nbOfSongs,len(self.lookupTable))
 						self._db.save()
-		self.onLibraryLoaded(self.nbOfSongs,len(self.lookupTable))
 
 	def getAudioLength(self,filename):
 		if filename.split(".")[-1]=="mp3":
