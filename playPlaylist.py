@@ -42,11 +42,11 @@ metricsFile = ""
 musicPath = ""
 song = None
 genrePath = ""
+delay = 6.0
+enableAnnoucements = True
 if len(sys.argv)>3:
 	musicPath = sys.argv[1].rstrip("/")
 	metricsFile = sys.argv[2]
-	enableAnnoucements = True
-	delay = 6.0
 	if len(sys.argv)>3:
 		if sys.argv[3]=="0":
 			enableAnnoucements = False
@@ -149,6 +149,7 @@ class PlayerPanel(BoxLayout):
 		musicPath = path
 		self.dismiss_popup()
 		self.playlistGenerator.setMusicPath(musicPath)
+		self.generateSong()
             
 	def loadAnnouncementPath(self, path, filename):
 		global genrePath
@@ -161,6 +162,7 @@ class PlayerPanel(BoxLayout):
 		metricsFile = filename[0]
 		self.dismiss_popup()
 		self.playlistGenerator.setMetrics(metricsFile)
+		self.generateSong()
 
 	def loadMusic(self,instance):
 		content = LoadDialog(load=self.loadMusicPath, cancel=self.dismiss_popup)
@@ -317,11 +319,14 @@ class PlayerPanel(BoxLayout):
 		print ("Generating song")
 		global song
 		song = self.playlistGenerator.generateUniqueSong()
-		self.songIndex += 1
-		self.timeSlider.max = song.length
-		self.timeSlider.value=0
-		self.player.loadSong(song)
-		self.player.play()
+		if song:
+			self.songIndex += 1
+			self.timeSlider.max = song.length
+			self.timeSlider.value=0
+			self.player.loadSong(song)
+			self.player.play()
+		else:
+			print ("Failed to generate a song")
 	
 	def songEndReachedCallback(self):
 		print ("End")

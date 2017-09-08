@@ -30,7 +30,10 @@ class PlaylistGenerator(object):
 		
 
 	def setMusicPath(self,musicPath):
-		self.library = MusicLibrary(musicPath)
+		if musicPath:
+			self.library = MusicLibrary(musicPath)
+		else:
+			self.library = None
 	
 	def setMetrics(self,playlistMetricsFile):
 		self.playlistMetrics.load(playlistMetricsFile)
@@ -59,7 +62,9 @@ class PlaylistGenerator(object):
 	
 	def generateUniqueSong(self):
 		song = self.generateSong()
-		while (not song or self.lastGenre==song.genre or song in self.songList):
+		if not song:
+			return None
+		while (self.lastGenre==song.genre or song in self.songList):
 			song = self.generateSong()
 		self.lastGenre = song.genre
 		self.songList += [song]

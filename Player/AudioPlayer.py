@@ -7,7 +7,7 @@ import vlc
 
 from pydub import AudioSegment
 from pydub.utils import make_chunks
-
+import os.path
 
 from Tools import DirectoryTools
 from Player import AudioEffects
@@ -53,7 +53,7 @@ class AudioPlayer(object):
 			song = AudioEffects.fallbackSpeedChange(sound,speed)
 		else:
 			song = AudioEffects.speedChange(sound,speed)
-		if playAnnouncement:
+		if playAnnouncement and announcement:
 			pause = AudioSegment.silent(duration=announcementDelay*1000)
 			return announcement+pause+announcement+song
 		else:
@@ -70,7 +70,9 @@ class AudioPlayer(object):
 		song = AudioSegment.from_file(track.url, DirectoryTools.getFileType(track.url))
 		announcement = None
 		if self._playAnnouncement:
-			announcement = AudioSegment.from_file(self.announcementDirectory+"/"+track.genre+".mp3", "mp3")
+			announcementFileName = self.announcementDirectory+"/"+track.genre+".mp3"
+			if os.path.isfile(announcementFileName) :
+				announcement = AudioSegment.from_file(announcementFileName, "mp3")
 		audio = self.processSong(song,announcement,self._playAnnouncement,self._announcementDelay,speed)
 		audio.export(self._tmpFile.name,format="wav")
 		self._player = vlc.MediaPlayer(self._tmpFile.name)
