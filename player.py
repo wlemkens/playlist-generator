@@ -53,7 +53,7 @@ else:
 
 
 class PlayerPanel(BoxLayout):
-	def updatePanels(self,dt):
+	def updatePanels(self,dt):			
 		if self._player:
 			self.timeSlider.value = self._player.getTime()
 		
@@ -159,6 +159,7 @@ class PlayerPanel(BoxLayout):
 
 	def onLibraryLoaded(self,nbOfSongs,nbOfGenres):
 		genres = self.getGenres()
+		self.genreListAdapter.data = genres
 		self.songs = self.getFilteredSongs()
 		self.populateSongList(self.songs)
 		if self._popup:
@@ -174,6 +175,7 @@ class PlayerPanel(BoxLayout):
 
 		
 	def __init__(self, **kwargs):
+		print("__init__")
 		super(PlayerPanel, self).__init__(**kwargs)
 
 		self.titleFilter = ""
@@ -184,10 +186,6 @@ class PlayerPanel(BoxLayout):
 		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
 		self._keyboard.bind(on_key_down=self._on_keyboard_down)
 		self.library = None
-		if musicPath:
-			self.library = MusicLibrary(musicPath)
-		self.library.onLibraryLoaded = self.onLibraryLoaded
-		self.library.onSongFound = self.onSongFound
 		self.selectedSongIndex=0
 		self.allowSetTime = False
 		self.orientation = "vertical"
@@ -250,16 +248,21 @@ class PlayerPanel(BoxLayout):
 		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
 		
-		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
-		
 		self._popup = Popup(title="Loading library", content=Label(text="Loading library"),
 												size_hint=(0.8, 0.8))
-		#event = Clock.schedule_once(self.showPopup)
-		genres = self.getGenres()
-		self.songs = self.getFilteredSongs()
-		self.populateSongList(self.songs)
+
+		if musicPath:
+			self.library = MusicLibrary(musicPath)
+			self.library.onLibraryLoaded = self.onLibraryLoaded
+			self.library.onSongFound = self.onSongFound
+		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
+		
+		event = Clock.schedule_once(self.loadMusic,1)
 		#if self._popup:
 			#self._popup.dismiss()
+		
+	def loadMusic(self,dt):
+		self.library.loadMusic()
 		
 	def speedChangeCallback(self,speed):
 		self.speed = speed
@@ -320,6 +323,11 @@ class PlaylistPlayer(App):
 		self.panel = PlayerPanel()
 		#Window.fullscreen = 'auto'
 		return self.panel
+
+	def on_start(self):
+		print("on_start")
+#		if self.panel.library:
+#			self.panel.library.loadMusic()
 
 	def on_stop(self):
 		self.panel.library.close()

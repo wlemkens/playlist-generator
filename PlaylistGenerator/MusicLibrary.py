@@ -28,31 +28,55 @@ from pydub import AudioSegment
 # custom imports
 
 class MusicLibrary(object):
+	'''
+	The constructor of the library
+	Sets the music path
+	'''
 	def __init__(self,musicPath):
+		# Load the database
 		self._db = DB("music.db",musicPath)
+		# Initialise global variables
 		self.running  = True
 		self.musicPath = musicPath.rstrip('/')
 		self.lookupTable = {}
 		self.nbOfSongs = 0
+		# The tags we don't want in our list
 		self.blackList = ["balfolk","buikdans?","celtic","other","folk","folklore","trad."]
 		
+	'''
+	Start loading the music
+	'''
+	def loadMusic(self):
 		t = threading.Thread(target=self.loadLookupTable)
 		t.start()
 		
+	'''
+	Load the lookup table from the database
+	'''
 	def loadLookupTable(self):
+		self.generateLookupTable()
+		self.onLibraryLoaded(self.nbOfSongs,len(self.lookupTable))
+		t = threading.Thread(target=self.updateLookupTable)
+		t.start()
+			
+	'''
+	Create the lookup table based on the database
+	'''
+	def generateLookupTable(self):
+		print("Loading")
 		if self.musicPath in self._db.data:
-			for key,track in self._db.data[self.musicPath].items():
+			for path,track in self._db.data[self.musicPath].items():
 				if track.genre in self.lookupTable:
 					self.lookupTable[track.genre]+=[track]
 				else:
 					self.lookupTable[track.genre]=[track]
 				self.nbOfSongs+=1
 				self.onSongFound(self.nbOfSongs,len(self.lookupTable))
-		self.onLibraryLoaded(self.nbOfSongs,len(self.lookupTable))
-		t = threading.Thread(target=self.generateLookupTable)
-		t.start()
-			
-	def generateLookupTable(self):
+	'''
+	Update the lookup table according to the file system
+	'''
+	def updateLookupTable(self):
+		print("Updating")
 		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
 		for f in fileList:
 			if not self.running:
