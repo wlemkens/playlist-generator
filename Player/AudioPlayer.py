@@ -75,9 +75,10 @@ class AudioPlayer(object):
 				announcement = AudioSegment.from_file(announcementFileName, "mp3")
 			audio = self.processSong(song,announcement,self._playAnnouncement,self._announcementDelay,speed)
 			audio.export(self._tmpFile.name,format="wav")
+			self._player = vlc.MediaPlayer(self._tmpFile.name)
 		else:
-			self._tmpFile.name = track.url;
-		self._player = vlc.MediaPlayer(self._tmpFile.name)
+			self._player = vlc.MediaPlayer(track.url)
+			audio = song
 		pevent = self._player.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
 		self.trackLength = len(audio)
@@ -98,7 +99,8 @@ class AudioPlayer(object):
 			if self._player.get_state() == vlc.State.Playing:
 				self._player.stop()
 			self._player = None
-			self._tmpFile.close()
+			if self._tmpFile:
+				self._tmpFile.close()
 			self._tmpFile = None
 		self._paused = True
 
