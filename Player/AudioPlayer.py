@@ -5,6 +5,8 @@ from tempfile import NamedTemporaryFile
 
 import vlc
 
+from kivy.clock import Clock
+
 from pydub import AudioSegment
 from pydub.utils import make_chunks
 import os.path
@@ -22,7 +24,9 @@ class AudioPlayer(object):
 		self.announcementDirectory = announcementDirectory
 		self.trackLength = 0
 		self._fastSpeedChange = True
-		
+		self.loading = False
+		self.track = None
+		self.speed = None
 	def play(self):
 		if (self._player):
 			self._paused = False
@@ -58,12 +62,20 @@ class AudioPlayer(object):
 			return announcement+pause+announcement+song
 		else:
 			return song
-	
+	def checkLoading(self,dt):
+		if self.track and self.speed:
+			if not self.loading:
+				self.loadSong(self.track,self.speed)
+				self.play()
+			
 	def loadAndPlay(self,track,speed=1.0):
-		self.loadSong(track,speed)
-		self.play()
+		self.track = track
+		self.speed = speed
+		Clock.schedule_interval(self.checkLoading, 0.1)
+
 	
 	def loadSong(self,track,speed=1.0):
+		self.loading = True
 		self.cleanPlayer()
 			
 		song = AudioSegment.from_file(track.url, DirectoryTools.getFileType(track.url))
@@ -82,6 +94,10 @@ class AudioPlayer(object):
 		pevent = self._player.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
 		self.trackLength = len(audio)
+		if self.track==track and self.speed == speed:
+			self.track = None
+			self.speed = None
+		self.loading = False
 
 	# To be overwritten by parent
 	def endReachedCallback(self):

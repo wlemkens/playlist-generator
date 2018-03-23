@@ -141,6 +141,7 @@ class PlayerPanel(BoxLayout):
 	def songSelectionChanged(self, button):
 		global song
 		self.selectedSong = button
+		button.state = "down"
 		self.selectedSongIndex = button.index
 		if (self.selectedGenre):
 			for testSong in self.library.lookupTable[self.selectedGenre]:
