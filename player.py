@@ -251,6 +251,7 @@ class PlayerPanel(BoxLayout):
 		
 		self._popup = Popup(title="Loading library", content=Label(text="Loading library"),
 												size_hint=(0.8, 0.8))
+		self._popup.open()
 
 		if musicPath:
 			self.library = MusicLibrary(musicPath)
