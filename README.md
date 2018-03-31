@@ -126,11 +126,44 @@ player.py [path/to/music/]
 ## Windows
 ### Prerequisits
 
+- [VLC](https://www.videolan.org/vlc/download-windows.html)
+- [Visual Studio 14 Build Tools](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017)
 - [Python 3](https://www.python.org/downloads/)
+- Kivy 
+```
+python -m pip install --upgrade pip wheel setuptools
+python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew 
+python -m pip install kivy
+```
+- Numpy
+```
+python -m pip install numpy
+```
+- python-vlc
+```
+python -m pip install python-vlc
+```
+- Mutagen
+```
+python -m pip install mutagen
+```
+- taglib
+```
+python -m pip install Cython
+python -m pip install pytaglib
+```
+
+- Pydub
+```
+python -m pip install pydub
+```
+- Aubio
+```
+python -m pip install aubio
+```
 
 ### Recommended tools
 - [Notepad++](https://notepad-plus-plus.org/download/)
 - [Git for Windows](https://gitforwindows.org/)
 - [Tortoise GIT](https://tortoisegit.org/download/)
 
-- [
