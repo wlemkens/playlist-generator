@@ -121,3 +121,16 @@ This program will generate a list of the different dances and allow you to filte
 player.py [path/to/music/]
 ```
 * path/to/music/ : The directory the songs can be found. The complete underlying tree will be traversed
+
+# Development setup
+## Windows
+### Prerequisits
+
+- [Python 3](https://www.python.org/downloads/)
+
+### Recommended tools
+- [Notepad++](https://notepad-plus-plus.org/download/)
+- [Git for Windows](https://gitforwindows.org/)
+- [Tortoise GIT](https://tortoisegit.org/download/)
+
+- [
