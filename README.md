@@ -147,7 +147,7 @@ python -m pip install python-vlc
 ```
 python -m pip install mutagen
 ```
-- taglib
+- taglib : See https://github.com/supermihi/pytaglib/issues/36
 ```
 python -m pip install Cython
 python -m pip install pytaglib
