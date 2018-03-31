@@ -260,6 +260,8 @@ class PlayerPanel(BoxLayout):
 												size_hint=(0.8, 0.8))
 		#event = Clock.schedule_once(self.showPopup)
 		self.fullscreen = True
+		self._popup.open()
+		self.playlistGenerator.library.loadMusic()
 		self.generateSong()
 
 	def _keyboard_closed(self):
