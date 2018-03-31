@@ -76,7 +76,6 @@ class AudioPlayer(object):
 	
 	def loadSong(self,track,speed=1.0):
 		self.loading = True
-		self.cleanPlayer()
 			
 		song = AudioSegment.from_file(track.url, DirectoryTools.getFileType(track.url))
 		announcement = None
@@ -87,8 +86,10 @@ class AudioPlayer(object):
 				announcement = AudioSegment.from_file(announcementFileName, "mp3")
 			audio = self.processSong(song,announcement,self._playAnnouncement,self._announcementDelay,speed)
 			audio.export(self._tmpFile.name,format="wav")
+			self.cleanPlayer()
 			self._player = vlc.MediaPlayer(self._tmpFile.name)
 		else:
+			self.cleanPlayer()
 			self._player = vlc.MediaPlayer(track.url)
 			audio = song
 		pevent = self._player.event_manager()
