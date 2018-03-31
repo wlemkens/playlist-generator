@@ -53,7 +53,11 @@ else:
 
 
 class PlayerPanel(BoxLayout):
-	def updatePanels(self,dt):			
+	def updatePanels(self,dt):
+		if self.songsNeedRefresh:
+			self.populateSongList(self.songs)
+			self.songsNeedRefresh = False
+
 		if self._player:
 			self.timeSlider.value = self._player.getTime()
 		
@@ -162,7 +166,7 @@ class PlayerPanel(BoxLayout):
 		genres = self.getGenres()
 		self.genreListAdapter.data = genres
 		self.songs = self.getFilteredSongs()
-		self.populateSongList(self.songs)
+		self.songsNeedRefresh = True
 		if self._popup:
 			self._popup.dismiss()
 		print ("Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres))
@@ -192,6 +196,7 @@ class PlayerPanel(BoxLayout):
 		self.orientation = "vertical"
 		self.speed = 1.0
 		self._popup = None
+		self.songsNeedRefresh = False
 
 		mainPanel = BoxLayout()
 		self.add_widget(mainPanel)
