@@ -282,24 +282,29 @@ class PlayerPanel(BoxLayout):
 			self._keyboard = None
 
 	def pause(self):
-		self._player.togglePause()
+		if self._player:
+			self._player.togglePause()
 			
 	def backward(self):
-		self._player.setTime(self._player.getTime()-1)
+		if self._player:
+			self._player.setTime(self._player.getTime()-1)
 		
 	def forward(self):
-		self._player.set_time(self._player.getTime()+1)
+		if self._player:
+			self._player.set_time(self._player.getTime()+1)
 		
 	def playPrevious(self):
-		self.selectedSong = self.selectedSong.previousBtn
-		self.selectedSong.trigger_action()
+		if self.selectedSong:
+			self.selectedSong = self.selectedSong.previousBtn
+			self.selectedSong.trigger_action()
 
 	def playNext(self):
-		self.selectedSong = self.selectedSong.nextBtn
-		self.selectedSong.trigger_action()
+		if self.selectedSong:
+			self.selectedSong = self.selectedSong.nextBtn
+			self.selectedSong.trigger_action()
 	
 	def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-			if keycode[1] == 'spacebar':
+			if keycode[1] == 'spacebar' or keycode[1] == 'numpadenter':
 				self.pause()
 			elif keycode[1] == 'left':
 				if len(modifiers)>0 and modifiers[0] == 'shift':
@@ -311,6 +316,10 @@ class PlayerPanel(BoxLayout):
 					self.forward()
 				else:
 					self.playNext()
+			elif keycode[1] == 'down':
+					self.backward()
+			elif keycode[1] == 'up':
+					self.forward()
 			return True
 
 	def songEndReachedCallback(self,ev):

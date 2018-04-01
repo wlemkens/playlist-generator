@@ -296,7 +296,7 @@ class PlayerPanel(BoxLayout):
 			if keycode[1] == 'escape':
 				self.playlistGenerator.library.close()
 				sys.exit(0)
-			if keycode[1] == 'spacebar':
+			if keycode[1] == 'spacebar' or keycode[1] == 'numpadenter':
 				self.pause()
 			elif keycode[1] == 'left':
 				if len(modifiers)>0 and modifiers[0] == 'shift':
@@ -315,6 +315,10 @@ class PlayerPanel(BoxLayout):
 				else:
 					Window.fullscreen = "auto"
 					self.fullscreen = True
+			elif keycode[1] == 'down':
+					self.backward()
+			elif keycode[1] == 'up':
+					self.forward()
 			return True
 
 	def generateSong(self):
