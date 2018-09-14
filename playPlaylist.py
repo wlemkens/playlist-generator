@@ -38,24 +38,6 @@ from Tools import DirectoryTools
 from Gui.TimeSlider import TimeSlider
 from Player.AudioPlayer import AudioPlayer
 
-metricsFile = ""
-musicPath = ""
-song = None
-genrePath = ""
-delay = 6.0
-enableAnnoucements = True
-if len(sys.argv)>3:
-	musicPath = sys.argv[1].rstrip("/")
-	metricsFile = sys.argv[2]
-	if len(sys.argv)>3:
-		if sys.argv[3]=="0":
-			enableAnnoucements = False
-	if len(sys.argv)>4 and enableAnnoucements:
-		genrePath = sys.argv[4].rstrip("/")
-	if len(sys.argv)>5:
-		delay = float(sys.argv[5])
-else:
-	print ("CLI usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)>")
 
 class LoadDialog(FloatLayout):
 	load = ObjectProperty(None)
@@ -353,5 +335,24 @@ class PlaylistPlayer(App):
 		self.panel.playlistGenerator.library.close()
 		
 if __name__ == '__main__':
-	PlaylistPlayer().run()
-	
+	metricsFile = ""
+	musicPath = ""
+	song = None
+	genrePath = ""
+	delay = 6.0
+	enableAnnoucements = True
+	if len(sys.argv)>3:
+		musicPath = sys.argv[1].rstrip("/")
+		metricsFile = sys.argv[2]
+		if len(sys.argv)>3:
+			if sys.argv[3]=="0":
+				enableAnnoucements = False
+		if len(sys.argv)>4 and enableAnnoucements:
+			genrePath = sys.argv[4].rstrip("/")
+		if len(sys.argv)>5:
+			delay = float(sys.argv[5])
+		PlaylistPlayer().run()
+	else:
+		print ("CLI usage "+sys.argv[0]+" [path/to/music/] [path/to/playlist/metrics] [enable announcement 0/1] [path/to/genres/] <announcement delay (s)>")
+
+

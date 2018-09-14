@@ -62,12 +62,19 @@ class AudioPlayer(object):
 			return announcement+pause+announcement+song
 		else:
 			return song
+
+	'''
+	Check if a song is being loaded. If no loading is being done, load the requested song
+	'''
 	def checkLoading(self,dt):
 		if self.track and self.speed:
 			if not self.loading:
 				self.loadSong(self.track,self.speed)
 				self.play()
-			
+
+	'''
+	Load a song and set it for playing as soon as it is loaded
+	'''
 	def loadAndPlay(self,track,speed=1.0):
 		self.track = track
 		self.speed = speed
@@ -94,19 +101,27 @@ class AudioPlayer(object):
 			audio = song
 		pevent = self._player.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
+		print ("Track length = {:}".format(len(audio)))
 		self.trackLength = len(audio)
 		if self.track==track and self.speed == speed:
 			self.track = None
 			self.speed = None
 		self.loading = False
+		self.songLoadedCallback()
 
+	# To be overwritten by parent
+	def loadedCallback(self):
+		pass
 	# To be overwritten by parent
 	def endReachedCallback(self):
 		pass
 	
 	def setFastSpeedChange(self,value):
 		self._fastSpeedChange = value
-		
+
+	def songLoadedCallback(self):
+		self.loadedCallback()
+
 	def songEndReachedCallback(self,ev):
 		self.cleanPlayer()
 		self.endReachedCallback()

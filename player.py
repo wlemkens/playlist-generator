@@ -41,15 +41,6 @@ from Player.AudioPlayer import AudioPlayer
 
 
 
-metricsFile = ""
-musicPath = ""
-song = None
-genrePath = ""
-if len(sys.argv)>1:
-	musicPath = sys.argv[1].rstrip('/')
-else:
-	print ("Usage "+sys.argv[0]+" [path/to/music/]")
-	sys.exit(0)
 
 
 class PlayerPanel(BoxLayout):
@@ -183,13 +174,12 @@ class PlayerPanel(BoxLayout):
 		print("__init__")
 		super(PlayerPanel, self).__init__(**kwargs)
 
+		# Init all member variables
 		self.titleFilter = ""
 		self.bandFilter = ""
 		self.newSong = False
 		self.songIndex = -1
 		self.selectedGenre=""
-		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-		self._keyboard.bind(on_key_down=self._on_keyboard_down)
 		self.library = None
 		self.selectedSongIndex=0
 		self.allowSetTime = False
@@ -198,6 +188,11 @@ class PlayerPanel(BoxLayout):
 		self._popup = None
 		self.songsNeedRefresh = False
 
+		# Attach keyboard
+		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+		self._keyboard.bind(on_key_down=self._on_keyboard_down)
+
+		# Setup layout
 		mainPanel = BoxLayout()
 		self.add_widget(mainPanel)
 		controlPanel = BoxLayout(orientation='vertical',size_hint=(.3,1))
@@ -236,6 +231,7 @@ class PlayerPanel(BoxLayout):
 		self.songListView.add_widget(self.songListGrid)
 		self._player = AudioPlayer()
 		self._player.endReachedCallback = self.songEndReachedCallback
+		self._player.loadedCallback = self.songLoadedCallback
 
 		speedBox = BoxLayout(size=(300,30),size_hint=(1,None))
 		self.add_widget(speedBox)
@@ -253,18 +249,24 @@ class PlayerPanel(BoxLayout):
 		self.timeSlider = TimeSlider(max=100,size=(30,60),size_hint=(1,None))
 		self.timeSlider.on_value=self.onSliderValueChange
 		self.add_widget(self.timeSlider)
-		
+
+		# Create and show loading popup
 		self._popup = Popup(title="Loading library", content=Label(text="Loading library"),
 												size_hint=(0.8, 0.8))
 		self._popup.open()
 
+		# Load music library
 		if musicPath:
 			self.library = MusicLibrary(musicPath)
 			self.library.onLibraryLoaded = self.onLibraryLoaded
 			self.library.onSongFound = self.onSongFound
+
+		# Attach clock callback for gui updates
 		event = Clock.schedule_interval(self.updatePanels, 1 / 30.)
-		
+
+		# Attach clock callback for loading of music
 		event = Clock.schedule_once(self.loadMusic,1)
+
 		#if self._popup:
 			#self._popup.dismiss()
 		
@@ -325,10 +327,12 @@ class PlayerPanel(BoxLayout):
 	def songEndReachedCallback(self,ev):
 		self.playNext()
 
+	def songLoadedCallback(self):
+		self.timeSlider.max = self._player.trackLength/1000.0
+
 	def playSong(self):
 		self._player.loadAndPlay(song,self.speed)
-		self.timeSlider.max = self._player.trackLength/1000.0
-		
+
 		
 	def startSong(self):
 		self.playSong()
@@ -350,5 +354,13 @@ class PlaylistPlayer(App):
 
 		
 if __name__ == '__main__':
-	PlaylistPlayer().run()
-	
+	metricsFile = ""
+	musicPath = ""
+	song = None
+	genrePath = ""
+	if len(sys.argv)>1:
+		musicPath = sys.argv[1].rstrip('/')
+		PlaylistPlayer().run()
+	else:
+		print ("Usage "+sys.argv[0]+" [path/to/music/]")
+		sys.exit(0)
