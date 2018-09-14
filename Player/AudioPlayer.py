@@ -83,17 +83,23 @@ class AudioPlayer(object):
 	
 	def loadSong(self,track,speed=1.0):
 		self.loading = True
-			
 		song = AudioSegment.from_file(track.url, DirectoryTools.getFileType(track.url))
 		announcement = None
 		if self._playAnnouncement:
+			self.cleanPlayer()
 			self._tmpFile = NamedTemporaryFile("w+b", suffix=".wav")
 			announcementFileName = self.announcementDirectory+"/"+track.genre+".mp3"
 			if os.path.isfile(announcementFileName) :
 				announcement = AudioSegment.from_file(announcementFileName, "mp3")
 			audio = self.processSong(song,announcement,self._playAnnouncement,self._announcementDelay,speed)
 			audio.export(self._tmpFile.name,format="wav")
+			self._player = vlc.MediaPlayer(self._tmpFile.name)
+		elif speed != 1:
 			self.cleanPlayer()
+			self._tmpFile = NamedTemporaryFile("w+b", suffix=".wav")
+			print (self._tmpFile)
+			audio = self.processSong(song,announcement = None, playAnnouncement = False, announcementDelay = 0,speed = speed)
+			audio.export(self._tmpFile.name,format="wav")
 			self._player = vlc.MediaPlayer(self._tmpFile.name)
 		else:
 			self.cleanPlayer()
@@ -101,7 +107,6 @@ class AudioPlayer(object):
 			audio = song
 		pevent = self._player.event_manager()
 		pevent.event_attach(vlc.EventType().MediaPlayerEndReached, self.songEndReachedCallback)
-		print ("Track length = {:}".format(len(audio)))
 		self.trackLength = len(audio)
 		if self.track==track and self.speed == speed:
 			self.track = None
