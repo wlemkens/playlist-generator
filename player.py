@@ -113,7 +113,6 @@ class PlayerPanel(BoxLayout):
 			self.songListGrid.add_widget(speedLbl)
 		print ("populating done")
 		
-		
 	def getGenres(self,filterString=""):
 		genres = sorted(genre for genre in list(self.library.lookupTable) if filterString in genre)
 		return genres
@@ -169,6 +168,10 @@ class PlayerPanel(BoxLayout):
 	def onSongFound(self,nbOfSongs,nbOfGenres):
 		if self._popup:
 			self._popup.content.text = "Found {:d} songs and {:d} dances".format(nbOfSongs,nbOfGenres)
+		genres = self.getGenres()
+		self.genreListAdapter.data = genres
+		self.songs = self.getFilteredSongs()
+		self.songsNeedRefresh = True
 			
 	def showPopup(self,ev):
 		self._popup.open()
