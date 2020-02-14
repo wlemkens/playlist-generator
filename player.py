@@ -88,11 +88,22 @@ class PlayerPanel(BoxLayout):
 		self.bandFilter = value
 		self.songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
 		self.populateSongList(self.songs)
-
 	'''
 	Fill the GUI with the songs that have been found
 	:songs	list of songs
 	'''
+	def bpmToStars(self, bpm, lowerBound, upperBound):
+		rng = upperBound - lowerBound
+		offset = bpm - lowerBound
+		starOffset = offset * 5.0 / rng
+		stars = min(max(1, int(starOffset)+2),5)
+		return "*" * stars
+		
+	def getBpmRange(self,genre):
+		if genre in self.library.metadb.data:
+			return self.library.metadb.data[genre]
+		return [120,180]
+		
 	def populateSongList(self,songs):
 		print ("populating")
 		self.songListGrid.clear_widgets()
@@ -110,16 +121,8 @@ class PlayerPanel(BoxLayout):
 			index+=1
 			bandLbl = Label(text=song.band,size_hint_x=0.4, width=150)
 			durationLbl = Label(text=song.duration(),size_hint_x=None, width=70)
-			if song.bpm < 100:
-				spdTxt = "*"
-			elif song.bpm < 120:
-				spdTxt = "**"
-			elif song.bpm < 140:
-				spdTxt = "***"
-			elif song.bpm < 160:
-				spdTxt = "****"
-			else: 
-				spdTxt = "*****"				
+			bpmRange = self.getBpmRange(song.genre)
+			spdTxt = self.bpmToStars(song.bpm, bpmRange[0], bpmRange[1])
 			speedLbl = Label(text=spdTxt,size_hint_x=0.4, width=40)
 			self.songListGrid.add_widget(songBtn)
 			self.songListGrid.add_widget(bandLbl)

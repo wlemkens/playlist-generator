@@ -14,6 +14,7 @@ import taglib
 from PlaylistGenerator.Track import Track
 from PlaylistGenerator.PlaylistMetrics import PlaylistMetrics
 from PlaylistGenerator.DB import DB
+from PlaylistGenerator.MetaInfoDB import MetaInfoDB
 from Tools import DirectoryTools
 import random
 
@@ -28,13 +29,16 @@ from pydub import AudioSegment
 # custom imports
 
 class MusicLibrary(object):
-	'''
-	The constructor of the library
-	Sets the music path
-	'''
+	
 	def __init__(self,musicPath):
+		"""
+		The constructor of the library
+		Sets the music path
+		"""
+		
 		# Load the database
 		self._db = DB("music.db",musicPath)
+		self.metadb = MetaInfoDB("meta.db")
 		# Initialise global variables
 		self.running  = True
 		self.musicPath = musicPath.rstrip('/')
@@ -43,27 +47,30 @@ class MusicLibrary(object):
 		# The tags we don't want in our list
 		self.blackList = ["balfolk","buikdans?","celtic","other","folk","folklore","trad."]
 		
-	'''
-	Start loading the music
-	'''
 	def loadMusic(self):
+		"""
+		Start loading the music
+		"""
+		
 		t = threading.Thread(target=self.loadLookupTable)
 		t.start()
 		
-	'''
-	Load the lookup table from the database
-	'''
 	def loadLookupTable(self):
+		"""
+		Load the lookup table from the database
+		"""
+		
 		self.generateLookupTable()
 		self.onLibraryLoaded(self.nbOfSongs,len(self.lookupTable))
 		t = threading.Thread(target=self.updateLookupTable)
 		t.start()
 			
-	'''
-	Create the lookup table based on the database
-	'''
 	def generateLookupTable(self):
-		print("Loading")
+		"""
+		Create the lookup table based on the database
+		"""
+		
+		print("Loading lookup table")
 		if self.musicPath in self._db.data:
 			for path,track in self._db.data[self.musicPath].items():
 				if track.genre in self.lookupTable:
@@ -72,11 +79,14 @@ class MusicLibrary(object):
 					self.lookupTable[track.genre]=[track]
 				self.nbOfSongs+=1
 				self.onSongFound(self.nbOfSongs,len(self.lookupTable))
-	'''
-	Update the lookup table according to the file system
-	'''
+				
+				
 	def updateLookupTable(self):
-		print("Updating")
+		"""
+		Update the lookup table according to the file system
+		"""
+		
+		print("Updating lookup table")
 		fileList = DirectoryTools.getFilesFromDirectory(self.musicPath)
 		for f in fileList:
 			if not self.running:
@@ -91,6 +101,7 @@ class MusicLibrary(object):
 					track = Track(f,danceType,length,fileType,title,band)
 					if not self._db.contains(track):
 						bpm = self.getFileBpm(f)
+						bpm = self.filterGenreBpm(danceType, bpm, title)
 						track.bpm = bpm
 						self._db.addTrack(track)
 						if danceType in self.lookupTable:
@@ -145,6 +156,34 @@ class MusicLibrary(object):
 	
 	def onSongFound(self,nbOfSongs,nbOfGenres):
 		pass
+	
+	def filterGenreBpm(self, genre, bpm, song):
+		"""
+		Often it is hard to detect the correct bpm, but the detected bpm should be a multiple
+		of the real bpm
+		"""
+		if genre in self.metadb.data:
+			bestBpm = bpm
+			while bestBpm < self.metadb.data[genre][0]:
+				bestBpm *= self.metadb.data[genre][2]
+			while bestBpm > self.metadb.data[genre][1]:
+				bestBpm /= self.metadb.data[genre][2]
+			if self.metadb.data[genre][2] != 2:
+				n = 2
+				while bestBpm < self.metadb.data[genre][0]:
+					bestBpm = bpm * n / self.metadb.data[genre][2]
+					n += 1
+				n = 2
+				while bestBpm > self.metadb.data[genre][1]:
+					bestBpm = bpm / n
+					n *= 2
+				
+			if bestBpm < self.metadb.data[genre][0] or bestBpm > self.metadb.data[genre][1]:
+				print("Warning: Could not fit bpm ({:}) within boundaries [{:}, {:}] for {:} of genre {:}".format(bpm, self.metadb.data[genre][0], self.metadb.data[genre][1], song, genre))
+				bestBpm = bpm
+				
+		return bpm
+				
 	
 	def getFileBpm(self,path, params = None):
 		try:
