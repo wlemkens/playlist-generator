@@ -42,39 +42,57 @@ from Player.AudioPlayer import AudioPlayer
 
 
 
-
+'''
+The player panel doing most of the work
+'''
 class PlayerPanel(BoxLayout):
+	'''
+	Callback to update the panels periodically
+	:dt	The time increment
+	'''
 	def updatePanels(self,dt):
+		# Does the song list need a refresh (because new song is discovered)
 		if self.songsNeedRefresh:
 			self.populateSongList(self.songs)
 			self.songsNeedRefresh = False
 
+		# Update the player if it exists
 		if self._player:
 			self.timeSlider.value = self._player.getTime()
-		
-	#def updateDancePanel(self):
-		#global song
-		#self.dancePanel.font_size = (int)(np.min([self.size[1]/2.0,self.size[0]/20.0]))
-		#if song and song.genre:
-			#self.dancePanel.text = song.genre
-		#else:
-			#self.dancePanel.text = "Nothing"
-		
+
+	'''
+	Callback if some text has been entered in the genre text field
+	:instance	The instance of the genre text field
+	:value		The value entered
+	'''
 	def onGenreText(self,instance, value):
-		#self.songInput.text = ""
 		genres = self.getGenres(value)
 		self.genreListAdapter.data = genres
-		
+
+	'''
+	Callback if some text has been entered in the song name text field
+	:instance	The instance of the song name text field
+	:value		The value entered
+	'''
 	def onSongTitleText(self,instance, value):
 		self.titleFilter = value
 		self.songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
 		self.populateSongList(self.songs)
-		
+
+	'''
+	Callback if some text has been entered in the band name text field
+	:instance	The instance of the band text field
+	:value		The value entered
+	'''
 	def onBandNameText(self,instance, value):
 		self.bandFilter = value
 		self.songs = self.getFilteredSongs(self.titleFilter,self.bandFilter)
 		self.populateSongList(self.songs)
-		
+
+	'''
+	Fill the GUI with the songs that have been found
+	:songs	list of songs
+	'''
 	def populateSongList(self,songs):
 		print ("populating")
 		self.songListGrid.clear_widgets()
@@ -337,22 +355,22 @@ class PlayerPanel(BoxLayout):
 	def startSong(self):
 		self.playSong()
 
+'''
+The app itself although all the work is done by the component
+'''
 class PlaylistPlayer(App):
 		
 	def build(self):
 		self.panel = PlayerPanel()
-		#Window.fullscreen = 'auto'
+		Window.fullscreen = 'auto'
 		return self.panel
-
-	def on_start(self):
-		print("on_start")
-#		if self.panel.library:
-#			self.panel.library.loadMusic()
 
 	def on_stop(self):
 		self.panel.library.close()
 
-		
+'''
+Main, checking command line parameters
+'''
 if __name__ == '__main__':
 	metricsFile = ""
 	musicPath = ""
