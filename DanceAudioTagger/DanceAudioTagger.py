@@ -37,7 +37,7 @@ class DanceAudioTagger(object):
 				genrefile = genreDict[genreType]
 				genre = AudioSegment.from_mp3(genrefile)
 				pause = AudioSegment.silent(duration=10000)
-				taggedSong = genre+pause+genre+song
+				taggedSong = genre+pause+genre+song+pause
 				outfile = self.outputPath+filename+".mp3"
 				outPath = os.path.dirname(outfile)
 				if not os.path.exists(outPath):
