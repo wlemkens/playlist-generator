@@ -14,7 +14,7 @@ class DB(object):
 
 	def load(self):
 		if os.path.isfile(self._url):
-			with open(self._url,'r') as f:
+			with open(self._url,'r', encoding='utf-8') as f:
 				rightDb = False
 				musicPath = ""
 				for line in f:
@@ -28,7 +28,7 @@ class DB(object):
 						self.data[musicPath] = {}
 
 	def save(self):
-		with open(self._url,'w') as f:
+		with open(self._url,'w', encoding='utf-8') as f:
 			for musicPath,db in self.data.items():
 				f.write(musicPath+"\n")
 				for key,item in db.items():
