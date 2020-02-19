@@ -6,8 +6,9 @@ wals in 8 = wals in 8
 wals in 11 = wals in 11
 tovercirkel = tovercirkel
 jigs = jigs = french
+jig = jigs = french
 tarantella = tarantella
-kost ar koat = kost ar oat
+kost ar c'hoad = kost ar oat
 misirlou = misirloe
 fandango = fandango
 fandango - arin arin = fandango
@@ -18,6 +19,7 @@ andro = andro
 hanterdro = hanterdro
 gavottes suite = gavvotte swiet
 gavotte = gavvotte
+gavotte des montagnes = gavotte des montagnes = french
 polka = polka
 gavotte de l'aven = gavotte de l'aven = french
 maraichines = marachien
@@ -51,6 +53,7 @@ fado batido = fado batido
 mardi gras = mardi gra
 mazurka - wals = mazurka - wals
 ronde de loudéac = ronde de loedéac
+suite de loudéac = swiete de loedéac
 rondes du quercy = ronde du kercy
 scottish - polka = scottish - polka
 tovercirkel - wals - tovercirkel = tovercirkel - wals - tovercirkel
@@ -58,3 +61,24 @@ wals - scottish = wals - scottish
 wals écossaise = wals écossèse
 suite de loudéac = swiete de loedéac
 rond d'argenton = rond d'argenton = french
+bransle de vallée d'ossau = bransle de vallée d'ossau = french
+saia de carlonina = saia de carlonaina
+regadinho = regadino
+fadino de lavos = fadino de lavos
+rondeau en couple - tovercirkel = rondeau en coeple - tovercirkel
+mazurka créole = mazurka creeol
+bransles dossau = branle dossau
+traditionele mazurka = traditionele mazurka
+rond d'argenton = rond d'argenton = french
+slow = slow
+saia de carolina = saaja de karolaina
+congo de captieux = kongo de kaptjeu
+bransles dossau = branle dossoo
+rond de barbatre = ron de barbatre
+poraïe = porraje
+rond de marguerite = rond de margurite
+rond de l'île d'yeu = rond de lil djeu
+bransle de l'épine = branle de lepien
+ronde de chantecorps = rond de shantekor
+branle biarnés = branle bearnè
+tango = tango
