@@ -8,6 +8,7 @@ from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 class StaticPlaylistGenerator(PlaylistGenerator):
 	def __init__(self,musicPath,playlistMetrics,outputFile, duration):
 		super().__init__(musicPath,playlistMetrics)
+		self.library.loadLookupTable()
 		self.outputFile = outputFile
 		self.duration = float(duration*60)
 		self.playlist = []
