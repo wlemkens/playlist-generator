@@ -25,7 +25,7 @@ class MetaInfoDB(object):
 
 	def load(self):
 		if os.path.isfile(self._url):
-			with open(self._url,'r') as f:
+			with open(self._url,'r', encoding='utf-8') as f:
 				for line in f:
 					params = line.split(";")
 					if (len(params)==4):

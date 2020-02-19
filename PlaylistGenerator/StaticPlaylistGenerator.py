@@ -6,7 +6,7 @@ import os
 from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 
 class StaticPlaylistGenerator(PlaylistGenerator):
-	def __init__(self,musicPath,playlistMetrics,outputFile, duration):
+	def __init__(self,musicPath,playlistMetrics,outputFile, duration, refreshDB = False):
 		super().__init__(musicPath,playlistMetrics)
 		self.library.loadLookupTable()
 		self.outputFile = outputFile
@@ -20,8 +20,11 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 		lastGenre = None
 		while (totalDuration<self.duration):
 			song = self.generateUniqueSong()
-			self.playlist += [song]
-			totalDuration += song.length
+			if song:
+				self.playlist += [song]
+				totalDuration += song.length
+			else:
+				print("Found no song")
 		self.savePlaylist()
 
 	def savePlaylist(self):

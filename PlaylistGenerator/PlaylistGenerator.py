@@ -23,8 +23,11 @@ from PlaylistGenerator.PlaylistMetrics import PlaylistMetrics
 from Tools import DirectoryTools
 
 class PlaylistGenerator(object):
-	def __init__(self,musicPath,playlistMetricsFile):
+	def __init__(self,musicPath,playlistMetricsFile, refreshDB = False):
 		self.library = MusicLibrary(musicPath)
+		self.library.generateLookupTable()
+		if refreshDB:
+			self.library.updateLookupTable()
 		self.playlistMetrics = PlaylistMetrics()
 		self.fullLookupTable = self.library.lookupTable.copy()
 		self.playlistMetrics.load(playlistMetricsFile)
