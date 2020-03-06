@@ -75,10 +75,27 @@ saia de carolina = saaja de karolaina
 congo de captieux = kongo de kaptjeu
 bransles dossau = branle dossoo
 rond de barbatre = ron de barbatre
-poraïe = porraje
+la poraïe = la porraje
 rond de marguerite = rond de margurite
 rond de l'île d'yeu = rond de lil djeu
 bransle de l'épine = branle de lepien
 ronde de chantecorps = rond de shantekor
 branle biarnés = branle bearnè
 tango = tango
+branle de noirmoutier = branle de noirmoutier = french
+saut béarnais = saut béarnais = french
+set de saut béarnais = set de saut béarnais = french
+pas d'été a 4 = pas d'été a quatre = french
+demi rond = demi rond = french
+avant deux à coutant = avant deux à coutant = french
+ronde d'avant-deux = ronde d'avant-deux = french
+avant deux de gatine = avant deux de gatine = french
+fadinho de lavos = fadinho de lavos = french
+Fado Batido = Fado Batido = french
+Erva Cidreira = Erva Cidreira = french
+Drumul Dracului = Drumul Dracului = french
+Regadinho = Regadinho = french
+Chula Picada = Chula Picada = french
+saia da carolina = saia da carolina = french
+toma-lá-dá-cá = toma-lá-dá-cá = french
+branle de la fosse aux loups = branle de la fosse aux loups = french
