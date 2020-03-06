@@ -8,7 +8,10 @@ from PlaylistGenerator.DancePlaylistGenerator import DancePlaylistGenerator
 
 if __name__ == '__main__':
 	if len(sys.argv)<3:
-		print("Usage dancePlaylistGenerator.py [music/direcotry] [output/direcotry]")
+		print("Usage dancePlaylistGenerator.py [music/directory] [output/directory] <refresh db>")
 		sys.exit()
-	generator = DancePlaylistGenerator(sys.argv[1],sys.argv[2])
+	refreshDB = False
+	if len(sys.argv) >= 4:
+		refreshDB = (bool)(sys.argv[3])
+	generator = DancePlaylistGenerator(sys.argv[1],sys.argv[2], refreshDB)
 	generator.generatePlaylists()

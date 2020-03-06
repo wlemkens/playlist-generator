@@ -7,12 +7,11 @@ from PlaylistGenerator.PlaylistGenerator import PlaylistGenerator
 
 class StaticPlaylistGenerator(PlaylistGenerator):
 	def __init__(self,musicPath,playlistMetrics,outputFile, duration, refreshDB = False):
-		super().__init__(musicPath,playlistMetrics)
-		self.library.loadLookupTable()
+		super().__init__(musicPath,playlistMetrics, refreshDB)
 		self.outputFile = outputFile
 		self.duration = float(duration*60)
 		self.playlist = []
-		self.extinf = {'mp3':"#EXTINF:221",'flac':"#EXTINF:331"}
+		self.extinf = {'mp3':"#EXTINF:",'flac':"#EXTINF:"}
 
 	def generatePlaylist(self):
 		print ("Generating playlist of "+str(self.duration/60)+" minutes")
@@ -33,9 +32,10 @@ class StaticPlaylistGenerator(PlaylistGenerator):
 			f.write(header)
 			for song in self.playlist:
 				extinf = self.extinf[song.fileType]
-				extline = extinf+","+song.title+"\n"
+				extline = extinf+str(int(song.length))+","+song.title+"\n"
 				path = os.path.commonpath([song.url,self.outputFile])
+				relpath = os.path.relpath(song.url,os.path.dirname(self.outputFile))
 				url = song.url[len(path)+1:]
-				fileline = url+"\n"
+				fileline = relpath+"\n"
 				f.write(extline)
 				f.write(fileline)

@@ -33,7 +33,9 @@ class PlaylistGenerator(object):
 		self.playlistMetrics.load(playlistMetricsFile)
 		self.lastGenre = None
 		self.songList = []
-		
+		self.danceSet = set()
+
+
 
 	def setMusicPath(self,musicPath):
 		if musicPath:
@@ -52,7 +54,6 @@ class PlaylistGenerator(object):
 
 		# pick a random value between 0 and 1
 		value = random.random()
-		
 		for item in self.playlistMetrics.cumulativeList:
 			# If the sum of all earlier checked genres is larger then the random value, 
 			# pick the last checked genre. (i.o.w. pick according to the chance distribution
@@ -61,18 +62,27 @@ class PlaylistGenerator(object):
 				if genre in self.library.lookupTable:
 					nbOfSongs = len(self.library.lookupTable[genre])
 					# Check if we still have more than one song left of this genre
-					if nbOfSongs>1:
-						# pick a random song of this genre
-						index = random.randint(0,nbOfSongs-1)
+					if nbOfSongs>0:
+						if nbOfSongs>1:
+							# pick a random song of this genre
+							index = random.randint(0,nbOfSongs-1)
+						else:
+							# pick the last song of this genre
+							index = 0
+						try:
+							song = self.library.lookupTable[genre][index]
+						except (Exception):
+							print ("Error loading song :d for genre ':s'".format(index,genre))
+						self.library.lookupTable[genre] = self.library.lookupTable[genre][:index]+self.library.lookupTable[genre][index+1:]
 					else:
-						# pick the last song of this genre
-						index = 0
-					try:
-						song = self.library.lookupTable[genre][index]
-					except (Exception):
-						print ("Error loading song :d for genre ':s'".format(index,genre))
+						if not genre in self.danceSet:
+							print("Didn't find any song for dance '{:}'".format(genre))
+						else:
+							print("Didn't find enough songs for dance '{:}'".format(genre))
+						song = None
+
 					# remove the song from the list so we don't pick it again
-					self.library.lookupTable[genre] = self.library.lookupTable[genre][:index]+self.library.lookupTable[genre][index+1:]
+					self.danceSet.add(genre)
 					return song
 				else:
 					print ("WARNING: dance '"+genre+"' not found in set")
@@ -90,7 +100,7 @@ class PlaylistGenerator(object):
 		if not song:
 			return None
 		# If the song was of the same genre as last song, get a new one
-		while (self.lastGenre==song.genre or song in self.songList):
+		while (not song or self.lastGenre==song.genre or song in self.songList):
 			song = self.generateSong()
 		# Mark a new most recent song
 		self.lastGenre = song.genre
