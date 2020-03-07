@@ -82,7 +82,10 @@ class PlaylistGenerator(object):
 						song = None
 
 					# remove the song from the list so we don't pick it again
-					self.danceSet.add(genre)
+					if song:
+						if not genre in self.danceSet:
+							print("Found dance {:}".format(genre))
+							self.danceSet.add(genre)
 					return song
 				else:
 					print ("WARNING: dance '"+genre+"' not found in set")
