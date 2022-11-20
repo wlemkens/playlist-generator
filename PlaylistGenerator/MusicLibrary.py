@@ -7,8 +7,8 @@
 # system imports
 import os
 from mutagen.id3._util import ID3NoHeaderError
-from mutagen.mp3 import MP3
-from mutagen.flac import FLAC
+from mutagen.mp3 import MP3, HeaderNotFoundError
+from mutagen.flac import FLAC, FLACNoHeaderError
 from mutagen.easyid3 import EasyID3
 import taglib
 from PlaylistGenerator.Track import Track
@@ -37,11 +37,11 @@ class MusicLibrary(object):
 		"""
 		
 		# Load the database
-		self._db = DB("music.db",musicPath)
+		self.musicPath = musicPath.rstrip('/')
+		self._db = DB("music.db",self.musicPath)
 		self.metadb = MetaInfoDB("meta.db")
 		# Initialise global variables
 		self.running  = True
-		self.musicPath = musicPath.rstrip('/')
 		self.lookupTable = {}
 		self.nbOfSongs = 0
 		# The tags we don't want in our list
@@ -71,7 +71,7 @@ class MusicLibrary(object):
 		"""
 		
 		print("Loading lookup table")
-		if self.musicPath in self._db.data:
+		if self.musicPath in self._db.data.keys():
 			for path,track in self._db.data[self.musicPath].items():
 				if track.genre in self.lookupTable:
 					self.lookupTable[track.genre]+=[track]
@@ -93,32 +93,39 @@ class MusicLibrary(object):
 				break
 			danceType = DirectoryTools.getGenre(f)
 			length = self.getAudioLength(f)
-			fileType = DirectoryTools.getFileType(f)
-			title = self.getTitle(f)
-			band = self.getBand(f)
-			if danceType and length>0:
-				if not danceType in self.blackList:
-					track = Track(f,danceType,length,fileType,title,band)
-					if not self._db.contains(track):
-						bpm = self.getFileBpm(f)
-						bpm = self.filterGenreBpm(danceType, bpm, title)
-						track.bpm = bpm
-						self._db.addTrack(track)
-						if danceType in self.lookupTable:
-							self.lookupTable[danceType]+=[track]
-						else:
-							self.lookupTable[danceType]=[track]
-						self.nbOfSongs+=1
-						self.onSongFound(self.nbOfSongs,len(self.lookupTable))
-						self._db.save()
+			if length > 0:
+				fileType = DirectoryTools.getFileType(f)
+				title = self.getTitle(f)
+				band = self.getBand(f)
+				if danceType and length>0:
+					if not danceType in self.blackList:
+						track = Track(f,danceType,length,fileType,title,band)
+						if not self._db.contains(track):
+							bpm = self.getFileBpm(f)
+							bpm = self.filterGenreBpm(danceType, bpm, title)
+							track.bpm = bpm
+							self._db.addTrack(track)
+							if danceType in self.lookupTable:
+								self.lookupTable[danceType]+=[track]
+							else:
+								self.lookupTable[danceType]=[track]
+							self.nbOfSongs+=1
+							self.onSongFound(self.nbOfSongs,len(self.lookupTable))
+							self._db.save()
 
 	def getAudioLength(self,filename):
 		if filename.split(".")[-1]=="mp3":
-			audio = MP3(filename)
-			return audio.info.length
+			try:
+				audio = MP3(filename)
+				return audio.info.length
+			except HeaderNotFoundError:
+				print(f"No mp3 header {filename}")
 		else:
-			audio = FLAC(filename)
-			return audio.info.length
+			try:
+				audio = FLAC(filename)
+				return audio.info.length
+			except FLACNoHeaderError:
+				print(f"Invalid FLAC file {filename}")
 		return 0
 		
 	def getTitle(self,filename):
@@ -162,7 +169,7 @@ class MusicLibrary(object):
 		Often it is hard to detect the correct bpm, but the detected bpm should be a multiple
 		of the real bpm
 		"""
-		if genre in self.metadb.data:
+		if genre in self.metadb.data and bpm > 0:
 			bestBpm = bpm
 			while bestBpm < self.metadb.data[genre][0]:
 				bestBpm *= self.metadb.data[genre][2]
@@ -187,6 +194,11 @@ class MusicLibrary(object):
 	
 	def getFileBpm(self,path, params = None):
 		try:
+			id3info = taglib.File(path)
+			bpm = None
+			if "BPM" in id3info.tags:
+				bpm = int(id3info.tags["BPM"][0])
+				return bpm
 			with NamedTemporaryFile("w+b", suffix=".wav") as tmpFile:
 				song = AudioSegment.from_file(path, DirectoryTools.getFileType(path))
 				song.export(tmpFile.name,format="wav")

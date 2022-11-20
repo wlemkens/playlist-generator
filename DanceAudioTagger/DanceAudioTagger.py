@@ -31,24 +31,25 @@ class DanceAudioTagger(object):
 	def createTaggedSong(self,songfile,genreDict):
 		try:
 			filename = os.path.splitext(songfile[len(self.musicPath):])[0]
-			song = AudioSegment.from_file(songfile, DirectoryTools.getFileType(songfile))
-			genreType = DirectoryTools.getGenre(songfile)
-			if genreType and genreType in genreDict:
-				genrefile = genreDict[genreType]
-				genre = AudioSegment.from_mp3(genrefile)
-				pause = AudioSegment.silent(duration=10000)
-				taggedSong = genre+pause+genre+song+pause
-				outfile = self.outputPath+filename+".mp3"
-				outPath = os.path.dirname(outfile)
-				if not os.path.exists(outPath):
-					os.makedirs(outPath)
-				taggedSong.export(outfile,format="mp3")
-				self.copyTags(songfile,outfile)
-			elif genreType and not genreType in ["folk","world","balfolk","celtic","folklore","national folk"]:
-				# Just to reduce the number of useless warnings
-				print ("No tag for dance '"+genreType+"' found for file '"+songfile+"'")
-			# elif not genreType:
-			# 	print ("No tag for file '"+songfile+"'")
+			outfile = self.outputPath + filename + ".mp3"
+			if not os.path.exists(outfile):
+				song = AudioSegment.from_file(songfile, DirectoryTools.getFileType(songfile))
+				genreType = DirectoryTools.getGenre(songfile)
+				if genreType and genreType in genreDict:
+					genrefile = genreDict[genreType]
+					genre = AudioSegment.from_mp3(genrefile)
+					pause = AudioSegment.silent(duration=10000)
+					taggedSong = genre+pause+genre+song+pause
+					outPath = os.path.dirname(outfile)
+					if not os.path.exists(outPath):
+						os.makedirs(outPath)
+					taggedSong.export(outfile,format="mp3")
+					self.copyTags(songfile,outfile)
+				elif genreType and not genreType in ["folk","world","balfolk","celtic","folklore","national folk"]:
+					# Just to reduce the number of useless warnings
+					print ("No tag for dance '"+genreType+"' found for file '"+songfile+"'")
+				# elif not genreType:
+				# 	print ("No tag for file '"+songfile+"'")
 		except:
 			print ("Failed to prepend "+self.outputPath+filename+" : "+str(sys.exc_info()[0]))
 

@@ -11,7 +11,7 @@ tarantella = tarantella
 kost ar c'hoad = kost ar oat
 misirlou = misirloe
 fandango = fandango
-fandango - arin arin = fandango
+fandango - arin-arin = fandango
 bourrée in 2 = boerree in 2
 bourrée in 3 = boerree in 3
 repasseado = repasseado
@@ -20,30 +20,43 @@ hanterdro = hanterdro
 gavottes suite = gavvotte swiet
 gavotte = gavvotte
 gavotte des montagnes = gavotte des montagnes = french
+suite gavottes des montagnes = suite gavottes des montagnes = french
 polka = polka
 gavotte de l'aven = gavotte de l'aven = french
 maraichines = marachien
+maraîchines = marachien
 marchoise = marchwaaz
 madison = madison
 pas d'été = pa d'été
+pas d'été du pingouin ivre = pa d'été du penguai ievre
 plinn = plinn
 plinn suite = plinn swiet
+suite plinn bal = swiet plinn bal
+suite plinn dans = swiet plinn dans
+suite plinn = swiet plinn
 polska = polska
 polka = polka
 reels = riels
-ridée = ridée
+ridée = ridé
 laridé = laridé = french
-ronde de st vincent = rond de saint vincent = french
+ronde de saint-vincent = rond de saint vincent = french
+rond de saint-vincent = rond de saint vincent = french
 rondeau = rondeau
 rondeau en chaine = rondeau en chène
+rondeau en chaîne = rondeau en chène
 rondeau en couple = rondeau en coeple
 scottish impaire = scottish impair
 suite de bransles = swiete de branle
+branle de noirmoutier = branle de noirmoutier = french
 tricot = triko
 la poraie = la poraie = french
 poraie = poraie = french
+polaïe = poraie = french
 bal limousine = bal limousien
-avant deux = avant deu
+avant-deux = avant deu
+avant-deux cercle = avant deu serkle
+avant-deux de gatine = avant deu de gatien
+avant-deux à coutant = avant deu a koutant
 kas abarh = kasabba
 carnaval de lantz = carnaval de lantz
 chula picada = chula picada
@@ -53,8 +66,10 @@ fado batido = fado batido
 mardi gras = mardi gra
 mazurka - wals = mazurka - wals
 ronde de loudéac = ronde de loedéac
+rond de loudéac = ronde de loedéac
 suite de loudéac = swiete de loedéac
 rondes du quercy = ronde du kercy
+ronde du quercy = ronde du kercy
 scottish - polka = scottish - polka
 tovercirkel - wals - tovercirkel = tovercirkel - wals - tovercirkel
 wals - scottish = wals - scottish
@@ -68,6 +83,7 @@ fadino de lavos = fadino de lavos
 rondeau en couple - tovercirkel = rondeau en coeple - tovercirkel
 mazurka créole = mazurka creeol
 bransles dossau = branle dossau
+branles d'ossau = branle dossau
 traditionele mazurka = traditionele mazurka
 rond d'argenton = rond d'argenton = french
 slow = slow
@@ -99,3 +115,14 @@ Chula Picada = Chula Picada = french
 saia da carolina = saia da carolina = french
 toma-lá-dá-cá = toma-lá-dá-cá = french
 branle de la fosse aux loups = branle de la fosse aux loups = french
+contradans = contradans
+lange nelle = lange nelle
+halling = halling
+rigodon = rigodon = french
+wals in 92 = wals in 92
+rond de barbâtre = rond de barbatre = french
+danse des ours = danse des ours = french
+ronde = ronde = french
+slängpolska = slengpolska
+wals musette = wals
+tovercirkel in 3 = tovercikel in 3

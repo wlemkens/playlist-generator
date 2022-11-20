@@ -33,7 +33,7 @@ sudo apt install libtag1-dev
 
 ```
 sudo apt install git
-sudo apt install python3-pip
+sudo apt install python3-pip python3-dev
 sudo apt install python3-taglib python3-mutagen ffmpeg python3-numpy libvlc-dev vlc python3-scipy python3-matplotlib aubio-tools libaubio-dev libaubio-doc
 sudo pip3 install pydub
 sudo pip3 install aubio
