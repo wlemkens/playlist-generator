@@ -10,6 +10,11 @@ if __name__ == '__main__':
 	if len(sys.argv)<5:
 		print("Usage generatePlaylist.py [music/path] [playlist/metrics/path] [output/filename] [duration (min)] <refresh-db> </forced/path/>")
 		print("")
+		print("  [music/path] : The path to your music library")
+		print("  [playlist/metrics/path] : The path to the playlist metrics (non normalized chance distribution)")
+		print("  [output/filename] : Filename for the playlist")
+		print("  [duration (min)] : The number of minutes the playlist needs to be. (Generation will stop when the last added track will go over the limit)")
+		print("  <refresh-db> : 1 to refresh the database, 0 to keep the database as is.")
 		print("  </forced/path/> : Paths in the playlist will be relative to the working directory. To enforce a different path, you can give one here.")
 		sys.exit()
 	refreshDB = False

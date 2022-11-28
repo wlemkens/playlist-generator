@@ -23,33 +23,76 @@ from PlaylistGenerator.PlaylistMetrics import PlaylistMetrics
 from Tools import DirectoryTools
 
 class PlaylistGenerator(object):
-	def __init__(self,musicPath,playlistMetricsFile, refreshDB = False):
+	"""
+	The base class for a playlist generator
+	"""
+
+	def __init__(self,musicPath : str, playlistMetricsFile : str, refreshDB : bool = False):
+		"""
+		Constructor
+
+		Parameters
+		----------
+		musicPath : str
+			The root directory the music can be found in
+		playlistMetricsFile : str
+			The file containing the playlist metrics
+		refreshDB : bool, optional
+			Refresh the database. The database is not refreshed by default.
+
+		"""
+
+		# Load the library
 		self.library = MusicLibrary(musicPath)
+		# Generate the lookup table for quick processing
 		self.library.generateLookupTable()
+		# Update the lookup table if requested
 		if refreshDB:
 			self.library.updateLookupTable()
-		self.playlistMetrics = PlaylistMetrics()
 		self.fullLookupTable = self.library.lookupTable.copy()
+		# Load the playlist metrics
+		self.playlistMetrics = PlaylistMetrics()
 		self.playlistMetrics.load(playlistMetricsFile)
+		# Keep track of the last requested genre to avoid having the same dance twice after eachother
 		self.lastGenre = None
+		# The playlists
 		self.songList = []
+		# Set of dances in the playlist
 		self.danceSet = set()
 
 
 
-	def setMusicPath(self,musicPath):
+	def setMusicPath(self, musicPath : str):
+		"""
+		Set the music path for the library
+
+		Parameters
+		----------
+		musicPath : str
+			Path to the root of the music library
+		"""
+
 		if musicPath:
 			self.library = MusicLibrary(musicPath)
 		else:
 			self.library = None
 	
-	def setMetrics(self,playlistMetricsFile):
+	def setMetrics(self, playlistMetricsFile : str):
+		"""
+		Load the metrics
+
+		playlistMetricsFile : str
+			The file containing the metrics (non-normalized chance distribution) for the playlist
+		"""
+
 		self.playlistMetrics.load(playlistMetricsFile)
 		
 	
 	def generateSong(self):
 		"""
-		Pick a random song, based on the configured metrics
+		Pick a random song, based on the configured metrics.
+
+		This is not considering the last picked genre
 		"""
 
 		# pick a random value between 0 and 1
@@ -57,13 +100,13 @@ class PlaylistGenerator(object):
 		for item in self.playlistMetrics.cumulativeList:
 			# If the sum of all earlier checked genres is larger then the random value, 
 			# pick the last checked genre. (i.o.w. pick according to the chance distribution
-			if item[0]>value:
+			if item[0] > value:
 				genre = item[1]
 				if genre in self.library.lookupTable:
 					nbOfSongs = len(self.library.lookupTable[genre])
 					# Check if we still have more than one song left of this genre
-					if nbOfSongs>0:
-						if nbOfSongs>1:
+					if nbOfSongs > 0:
+						if nbOfSongs > 1:
 							# pick a random song of this genre
 							index = random.randint(0,nbOfSongs-1)
 						else:
@@ -94,7 +137,7 @@ class PlaylistGenerator(object):
 	def generateUniqueSong(self):
 		"""
 		Pick a random song, based on the configured metrics and make sure the genre is 
-		not the same two times after eachother
+		not the same two times after each other
 		"""
 
 		# Pick a random song
